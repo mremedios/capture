@@ -20,7 +20,6 @@ namespace Capture.Service
 		private TcpClient _homerClient;
 		private Task _task;
 		
-
 		public Capture(IConfiguration config, ILogger<Capture> logger)
 		{
 			_logger = logger;
@@ -37,7 +36,6 @@ namespace Capture.Service
 		public async Task StartAsync(CancellationToken ct)
 		{
 			_logger.LogInformation("Started");
-			_logger.LogInformation(_config.ToString());
 			_cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
 			var homerEndpoint = new IPEndPoint(IPAddress.Parse(_config.HomerAddress), _config.HomerPort);
@@ -46,37 +44,32 @@ namespace Capture.Service
 			_tcpListener = new TcpListener(listenEndpoint);
 			_homerClient = new TcpClient();
 			
-			await _homerClient.ConnectAsync(homerEndpoint);
+			await _homerClient.ConnectAsync(homerEndpoint, ct);
 			_tcpListener.Start();
 			
 			_task = CaptureAsync();
 		}
-
-		public Task StopAsync(CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
-		}
-
 		private async Task CaptureAsync()
 		{
 			var fileName = $"HEP_sample_{DateTime.Now:yyyyMMdd_hhmmss}.bin";
 			var ct = _cts.Token;
+			
 			var fileOutput = File.OpenWrite(fileName);
-			var client = await _tcpListener.AcceptTcpClientAsync();
+			var client = await _tcpListener.AcceptTcpClientAsync(ct);
 			var inputStream = client.GetStream();
 			var outputStream = _homerClient.GetStream();
 
 			try
 			{
-				ValueTask firstTasks;
-				while (!ct.IsCancellationRequested)
+				var read = 1;
+				while (!ct.IsCancellationRequested && read > 0)
 				{
 					using (var buffer = MemoryPool<byte>.Shared.Rent(1024))
 					{
 						_logger.LogInformation("Handle");
-						var readed = await inputStream.ReadAsync(buffer.Memory, ct);
-						firstTasks = fileOutput.WriteAsync(buffer.Memory.Slice(0, readed), ct);
-						await outputStream.WriteAsync(buffer.Memory.Slice(0, readed), ct);
+						read = await inputStream.ReadAsync(buffer.Memory, ct);
+						var firstTasks = fileOutput.WriteAsync(buffer.Memory.Slice(0, read), ct);
+						await outputStream.WriteAsync(buffer.Memory.Slice(0, read), ct);
 						await firstTasks;
 					}
 				}
@@ -88,10 +81,10 @@ namespace Capture.Service
 			}
 			finally
 			{
-				fileOutput.Dispose();
+				await fileOutput.DisposeAsync();
 				client.Dispose();
-				inputStream.Dispose();
-				outputStream.Dispose();
+				await inputStream.DisposeAsync();
+				await outputStream.DisposeAsync();
 			}
 		}
 

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateDefaultBuilder(args)
-    .ConfigureAppConfiguration((hostingContext, config) =>
+    .ConfigureAppConfiguration((_, config) =>
     {
         config
             .SetBasePath(Directory.GetCurrentDirectory())
@@ -14,12 +14,12 @@ var builder = Host.CreateDefaultBuilder(args)
     })
     .ConfigureServices(services =>
     {
-        services.AddHostedService<Capture.Service.Capture>();
+        services.AddHostedService<HostedService>();
     })
-    .ConfigureLogging((hostContext, configLogging) =>
+    .ConfigureLogging((_, configLogging) =>
     {
+        configLogging.ClearProviders();
         configLogging.AddConsole();
-        configLogging.AddDebug();
     });
 
 

@@ -1,3 +1,6 @@
+using System;
+using System.Net;
+
 namespace Capture.Service
 {
     public sealed class CaptureConfiguration

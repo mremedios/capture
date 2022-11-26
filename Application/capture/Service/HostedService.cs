@@ -19,7 +19,7 @@ public class HostedService: IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        return _capture.StartAsync(cancellationToken);
+        return _capture.StartAsync(_cts.Token);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

@@ -7,6 +7,6 @@ namespace Capture.Service
     {
         public string HomerAddress { get; set; }
         public int HomerPort { get; set; }
-        public int Port { get; set; }
+        public int ListenPort { get; set; }
     }
 }

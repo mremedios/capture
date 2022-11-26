@@ -10,7 +10,7 @@ var builder = Host.CreateDefaultBuilder(args)
     {
         config
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            .AddJsonFile("appsettings.json", optional: false);
     })
     .ConfigureServices(services =>
     {

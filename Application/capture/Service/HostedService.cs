@@ -11,9 +11,9 @@ public class HostedService: IHostedService
     private readonly ICapture _capture;
     private CancellationTokenSource _cts;
     
-    public HostedService(IConfiguration config, ILogger<Capture> logger)
+    public HostedService(IConfiguration config, ILogger<Capture> logger, ICapture capture)
     {
-        _capture = new Capture(config, logger);
+        _capture = capture;
     }
     
     public Task StartAsync(CancellationToken cancellationToken)

@@ -14,6 +14,7 @@ var builder = Host.CreateDefaultBuilder(args)
     })
     .ConfigureServices(services =>
     {
+        services.AddSingleton<ICapture, Capture.Service.Capture>();
         services.AddHostedService<HostedService>();
     })
     .ConfigureLogging((_, configLogging) =>

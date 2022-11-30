@@ -29,7 +29,6 @@ namespace Capture.Service
 
         public void Dispose()
         {
-            _logger.LogInformation("T3");
             _tcpListener.Stop();
             _homerClient?.Dispose();
             _cts?.Dispose();
@@ -64,7 +63,8 @@ namespace Capture.Service
             {
                 while (!_cts.Token.IsCancellationRequested)
                 {
-                    await AcceptClient(output);
+                    var client = await _tcpListener.AcceptTcpClientAsync(_cts.Token);
+                    AcceptClient(client, output);
                 }
             }
             finally
@@ -74,12 +74,10 @@ namespace Capture.Service
             }
         }
 
-        private async Task AcceptClient(Stream[] output)
+        private async Task AcceptClient(TcpClient client, Stream[] output)
         {
-            _logger.LogInformation("Waiting for a connection");
-            var client = await _tcpListener.AcceptTcpClientAsync(_cts.Token);
-            var inputStream = client.GetStream();
 
+            var inputStream = client.GetStream();
             try
             {
                 using (var buffer = MemoryPool<byte>.Shared.Rent(1024))
@@ -87,6 +85,7 @@ namespace Capture.Service
                     int read;
                     while ((read = await inputStream.ReadAsync(buffer.Memory, _cts.Token)) > 0)
                     {
+
                         _logger.LogInformation("Handle");
                         var tasks = output.Select(st =>
                             st.WriteAsync(buffer.Memory.Slice(0, read), _cts.Token).AsTask()
@@ -94,6 +93,10 @@ namespace Capture.Service
                         await Task.WhenAll(tasks);
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e.Message);
             }
             finally
             {

@@ -17,8 +17,8 @@ namespace Capture.Service
         private readonly ILogger<Capture> _logger;
         private CancellationTokenSource _cts;
 
-        private TcpListener _tcpListener;
-        private TcpClient _homerClient;
+        private UdpClient _listener;
+        private UdpClient _homerClient;
         private Task _task;
 
         public Capture(IConfiguration config, ILogger<Capture> logger)
@@ -29,7 +29,7 @@ namespace Capture.Service
 
         public void Dispose()
         {
-            _tcpListener.Stop();
+            _listener.Dispose();
             _homerClient?.Dispose();
             _cts?.Dispose();
         }
@@ -39,14 +39,11 @@ namespace Capture.Service
             _logger.LogInformation("Started");
             _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
-            var homerEndpoint = new IPEndPoint(IPAddress.Parse(_config.HomerAddress), _config.HomerPort);
             var listenEndpoint = new IPEndPoint(IPAddress.Any, _config.ListenPort);
 
-            _tcpListener = new TcpListener(listenEndpoint);
-            _homerClient = new TcpClient();
+            _listener = new UdpClient(listenEndpoint);
 
-            await _homerClient.ConnectAsync(homerEndpoint, ct);
-            _tcpListener.Start();
+            _homerClient = new UdpClient();
 
             _task = CaptureAsync();
         }
@@ -55,43 +52,12 @@ namespace Capture.Service
         {
             var fileName = $"HEP_sample_{DateTime.Now:yyyyMMdd_hhmmss}.bin";
             var fileOutputStream = File.OpenWrite(fileName);
-            var outputStream = _homerClient.GetStream();
-            
-            Stream[] output = { fileOutputStream, outputStream };
-            
+
             try
             {
                 while (!_cts.Token.IsCancellationRequested)
                 {
-                    var client = await _tcpListener.AcceptTcpClientAsync(_cts.Token);
-                    AcceptClient(client, output);
-                }
-            }
-            finally
-            {
-                await fileOutputStream.DisposeAsync();
-                await outputStream.DisposeAsync();
-            }
-        }
-
-        private async Task AcceptClient(TcpClient client, Stream[] output)
-        {
-
-            var inputStream = client.GetStream();
-            try
-            {
-                using (var buffer = MemoryPool<byte>.Shared.Rent(1024))
-                {
-                    int read;
-                    while ((read = await inputStream.ReadAsync(buffer.Memory, _cts.Token)) > 0)
-                    {
-
-                        _logger.LogInformation("Handle");
-                        var tasks = output.Select(st =>
-                            st.WriteAsync(buffer.Memory.Slice(0, read), _cts.Token).AsTask()
-                        );
-                        await Task.WhenAll(tasks);
-                    }
+                    await AcceptClient(_listener, fileOutputStream, _homerClient);
                 }
             }
             catch (Exception e)
@@ -100,9 +66,32 @@ namespace Capture.Service
             }
             finally
             {
-                Array.ForEach(output, st => st.Flush());
-                await inputStream.DisposeAsync();
-                client.Dispose();
+                await fileOutputStream.DisposeAsync();
+            }
+        }
+
+        private async Task AcceptClient(UdpClient client, Stream output, UdpClient homer)
+        {
+            var homerEndpoint = new IPEndPoint(IPAddress.Parse(_config.HomerAddress), _config.HomerPort);
+            try
+            {
+                while (!_cts.Token.IsCancellationRequested)
+                {
+                    _logger.LogInformation("Waiting");
+                    var x = await client.ReceiveAsync(_cts.Token);
+                    _logger.LogInformation("Handle {}" ,x.RemoteEndPoint.ToString());
+
+                    await output.WriteAsync(x.Buffer, _cts.Token);
+                    await homer.SendAsync(x.Buffer, homerEndpoint, _cts.Token);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e.Message);
+            }
+            finally
+            {
+                output.Flush();
             }
         }
     }

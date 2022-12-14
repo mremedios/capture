@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Capture.Service.Listener;
 
 namespace Capture.Service;
 
@@ -11,7 +12,7 @@ public class HostedService: IHostedService
     private readonly ICapture _capture;
     private CancellationTokenSource _cts;
     
-    public HostedService(IConfiguration config, ILogger<Capture> logger, ICapture capture)
+    public HostedService(IConfiguration config, ILogger<UdpCapture> logger, ICapture capture)
     {
         _capture = capture;
     }

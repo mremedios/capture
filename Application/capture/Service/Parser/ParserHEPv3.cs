@@ -159,7 +159,7 @@ namespace Capture.Service.Parser
 				Console.WriteLine(e.ToString());
 				Console.Write(e.StackTrace);
 				Console.WriteLine("Unable RUN WORKER");
-				throw e;
+				throw;
 			}
 
 			return hepStruct;

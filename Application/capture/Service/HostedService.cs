@@ -1,4 +1,4 @@
-using Capture.Service.Listener;
+п»їusing Capture.Service.Listener;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,7 +25,7 @@ public class HostedService : IHostedService
 
 		var startTasks = _captures.Select(x => x.StartAsync(_cts.Token));
 
-		//Напомни, скину ссылку на безопасный WhenAll
+		//РќР°РїРѕРјРЅРё, СЃРєРёРЅСѓ СЃСЃС‹Р»РєСѓ РЅР° Р±РµР·РѕРїР°СЃРЅС‹Р№ WhenAll
 
 		return Task.WhenAll(startTasks);
 	}

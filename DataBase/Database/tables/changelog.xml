@@ -9,13 +9,9 @@
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
     http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
 
-  <include file="tag.sql" relativeToChangelogFile="true" labels="Tables"/>
-  <include file="activity_type.sql" relativeToChangelogFile="true" labels="Tables"/>
-  <include file="equipment.sql" relativeToChangelogFile="true" labels="Tables"/>
-  <include file="equipment_activity_type.sql" relativeToChangelogFile="true" labels="Tables"/>
-  <include file="equipment_tags.sql" relativeToChangelogFile="true" labels="Tables"/>
-  <include file="service_history.sql" relativeToChangelogFile="true" labels="Tables"/>
-  <include file="activity.sql" relativeToChangelogFile="true" labels="Tables"/>
+  <include file="headers.sql" relativeToChangelogFile="true" labels="Tables"/>
+  <include file="available_headers.sql" relativeToChangelogFile="true" labels="Tables"/>
+  <include file="sources.sql" relativeToChangelogFile="true" labels="Tables"/>
 
 </databaseChangeLog>
 

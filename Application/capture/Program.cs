@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Capture.Service;
+using Capture.Service.Listener;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,7 +15,8 @@ var builder = Host.CreateDefaultBuilder(args)
     })
     .ConfigureServices(services =>
     {
-        services.AddSingleton<ICapture, Capture.Service.Capture>();
+        services.AddSingleton<ICapture, UdpCapture>();
+        services.AddSingleton<ICapture, TcpCapture>();
         services.AddHostedService<HostedService>();
     })
     .ConfigureLogging((_, configLogging) =>

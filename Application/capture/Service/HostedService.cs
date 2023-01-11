@@ -1,4 +1,4 @@
-﻿using Capture.Service.Listener;
+using Capture.Service.Listener;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

@@ -10,25 +10,24 @@ public class Tests
     }
 
     [Test]
-    public void SingleMessage()
+    public void SimpleMessage()
     {
-        using(Stream source = File.OpenRead("input/sample.bin"))
-        {
-            var parser = new ParserHePv3(source);
-            var x = parser.ParseMessage();
-            Console.WriteLine(x);
-        }
-        Assert.Pass();
+
+        var input = File.ReadAllBytes("input/sample.bin");
+        
+        var h = ParserHePv3.ParseMessage(input);
+
+        Assert.That(h.Hep.destinationIPAddress, Is.EqualTo("10.232.35.73"));
+        Assert.That(h.Hep.destinationPort, Is.EqualTo(5060));
     }
     
     [Test]
-    public void Stream()
+    public void MessageWithHeaders()
     {
-        using(Stream source = File.OpenRead("input/HEP_sample_20221202_095623.bin"))
-        {
-            var parser = new ParserHePv3(source);
-            parser.Parse();
-        }
-        Assert.Pass();
+        var input = File.ReadAllBytes("input/in1.bin");
+        var h = ParserHePv3.ParseMessage(input);
+
+        Assert.That(h.Hep.destinationIPAddress, Is.EqualTo("10.232.35.73"));
+        Assert.That(h.Hep.destinationPort, Is.EqualTo(5060));
     }
 }

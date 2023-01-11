@@ -18,11 +18,22 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="input\sample.bin" />
       <None Update="input\HEP_sample_20221202_095623.bin">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
       <None Update="input\123.bin">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="input\sample.bin">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="input\somepack.bin">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="input\in1.bin">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="input\HEP_sample_20221202_103917.bin">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
@@ -30,11 +41,6 @@
     <ItemGroup>
       <ProjectReference Include="..\Application\capture\Capture.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Content Include="input\sample.bin">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-    </ItemGroup>
+    
 
 </Project>

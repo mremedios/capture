@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Capture.Service.NameLater;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -16,15 +17,17 @@ namespace Capture.Service.Listener
         private readonly CaptureConfiguration _config;
         private readonly ILogger<UdpCapture> _logger;
         private CancellationTokenSource _cts;
+        private IHandler _handler;
 
         private UdpClient _listener;
         private UdpClient _homerClient;
         private Task _task;
 
-        public UdpCapture(IConfiguration config, ILogger<UdpCapture> logger)
+        public UdpCapture(IConfiguration config, ILogger<UdpCapture> logger, IHandler handler)
         {
             _logger = logger;
             _config = config.GetSection("Capture").Get<CaptureConfiguration>();
+            _handler = handler;
         }
 
         public void Dispose()
@@ -57,8 +60,8 @@ namespace Capture.Service.Listener
                 {
                     var x = await _listener.ReceiveAsync(_cts.Token);
                     _logger.LogInformation("Handle message from {}" ,x.RemoteEndPoint);
-
-                    await fileOutputStream.WriteAsync(x.Buffer, _cts.Token);
+                    
+                    _handler.HandleMessage(x.Buffer);
                 }
             }
             catch (Exception e)

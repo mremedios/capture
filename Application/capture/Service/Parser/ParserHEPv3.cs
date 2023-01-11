@@ -1,152 +1,130 @@
 using System;
 using System.IO;
 using System.Text;
-using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Extension;
-using SIPSorcery.SIP;
 
 namespace Capture.Service.Parser
 {
-    public class ParserHePv3
+    public static class ParserHePv3
     {
         private const int Offset = 6;
-
-        private readonly BinaryReader _reader;
-        private readonly MemoryStream _data;
-
-
-        public ParserHePv3(Stream input)
+        private static (string, string) ParseUnknownHeader(string str)
         {
-            
-            _reader = new BinaryReader(input);
-        }
-        public ParserHePv3()
-        {
-            _data = new MemoryStream(1024);
-            _reader = new BinaryReader(_data);
-        }
+            var x = str.Split(':');
+            x[0] = x[0].Replace("I-", "").Replace("X-", "");
 
-        public ValueTask Enqueue(byte[] bytes)
-        {
-            return _data.WriteAsync(bytes);
-
+            return (x[0].ToLower().Trim(), x[1].Trim());
         }
         
-        public void Parse()
+        public static Message ParseMessage(byte[] msg)
         {
-            while (true)
-            {
-                var hep = ParseMessage();
-                Console.WriteLine(hep.headers.CallId);
-                // Console.WriteLine("id: {0}, source: {1}", hep.captureId, hep.sourceIPAddress);
-            }
-        } 
-        public HEPStructure ParseMessage()
-        {
-            var header = _reader.ReadBytes(4);
+            var reader = new BinaryReader(new MemoryStream(msg));
+
+            var header = reader.ReadBytes(4);
             var expected = new byte[] { 0x48, 0x45, 0x50, 0x33 };
-            if (!header.SequenceEqual(expected)) throw new IOException("Invalid HEP header."); //  ¯\_(ツ)_/¯
-            var length = _reader.ReadInt16Be();
-            var hep =  Parse(length);
-                
-            var payload = SIPSorcery.SIP.SIPMessageBuffer.ParseSIPMessage(hep.payloadByteMessage, null, null);
-            hep.headers = SIPSorcery.SIP.SIPHeader.ParseSIPHeaders(payload.SIPHeaders);
-            if (hep.headers.ContentLength > 0)
+            if (!header.SequenceEqual(expected)) throw new IOException("Invalid HEP header.");
+            var length = reader.ReadInt16Be();
+            var message = Parse(reader, length);
+
+            var payload = SIPSorcery.SIP.SIPMessageBuffer.ParseSIPMessage(message.Payload, null, null);
+            var headers = SIPSorcery.SIP.SIPHeader.ParseSIPHeaders(payload.SIPHeaders);
+            message.Headers = new();
+            foreach (var h in headers.UnknownHeaders)
             {
-        
+                var (key, value) = ParseUnknownHeader(h);
+                message.Headers[key] = value;
             }
-            return hep;
+
+            message.Sip = headers;
+
+            return message;
         }
 
-        private HEPStructure Parse(int totalLength)
+        private static Message Parse(BinaryReader reader, int totalLength)
         {
-            HEPStructure hepStruct = new HEPStructure();
+            var hepStruct = new HEPStructure();
+            var message = new Message();
             try
             {
                 int i = Offset;
-                hepStruct.recievedTimestamp = hepStruct.timeSeconds * 1000000 + hepStruct.timeUseconds;
                 while (i < totalLength)
                 {
-                    var chunkId = _reader.ReadInt16Be();
-                    var chunkType = _reader.ReadInt16Be();
-                    var chunkLength = _reader.ReadInt16Be();
+                    var chunkId = reader.ReadInt16Be();
+                    var chunkType = reader.ReadInt16Be();
+                    var chunkLength = reader.ReadInt16Be();
 
                     if (chunkLength > totalLength)
                     {
-                        Console.WriteLine("Corrupted HEP: CHUNK LENGHT couldn't be bigger as CHUNK_LENGHT");
-                        _reader.ReadBytes(totalLength - i); 
-                        throw new IOException("Invalid HEP payload.");
+                        reader.ReadBytes(totalLength - i);
+                        throw new IOException( // todo throw custom exception?
+                            "Invalid HEP payload. Corrupted HEP: CHUNK LENGHT couldn't be bigger as CHUNK_LENGHT");
                     }
 
                     if (chunkLength == 0)
                     {
-                        Console.WriteLine("Corrupted HEP: LENGTH couldn't be 0!");
+                        Console.WriteLine("Corrupted HEP: LENGTH couldn't be 0!"); // todo
                         continue;
                     }
 
                     if (chunkId != 0)
                     {
-                        _reader.ReadBytes(chunkLength - Offset); // skip chunk
+                        reader.ReadBytes(chunkLength - Offset); // skip chunk
                         continue;
                     }
 
                     switch (chunkType)
                     {
                         case 1:
-                            hepStruct.ipFamily = _reader.ReadByte();
+                            hepStruct.ipFamily = reader.ReadByte();
                             break;
                         case 2:
-                            hepStruct.protocolId = _reader.ReadByte();
+                            hepStruct.protocolId = reader.ReadByte();
                             break;
                         case 3:
-                            var src_ip4 = _reader.ReadBytes(4);
-                            hepStruct.sourceIPAddress = IpToString(src_ip4);
+                            var srcIp4 = reader.ReadBytes(4);
+                            hepStruct.sourceIPAddress = IpToString(srcIp4);
                             break;
                         case 4:
-                            byte[] dst_ip4 = _reader.ReadBytes(4);
-                            hepStruct.destinationIPAddress = IpToString(dst_ip4);
+                            var dstIp4 = reader.ReadBytes(4);
+                            hepStruct.destinationIPAddress = IpToString(dstIp4);
                             break;
-                        // ipv6 не нужен :)
                         case 7:
-                            hepStruct.sourcePort = _reader.ReadUInt16Be();
+                            hepStruct.sourcePort = reader.ReadUInt16Be();
                             break;
                         case 8:
-                            hepStruct.destinationPort = _reader.ReadUInt16Be();
+                            hepStruct.destinationPort = reader.ReadUInt16Be();
                             break;
                         case 9:
-                            hepStruct.timeSeconds = _reader.ReadUInt32Be();
+                            hepStruct.timeSeconds = reader.ReadUInt32Be();
                             break;
                         case 10:
-                            hepStruct.timeUseconds = _reader.ReadUInt32Be();
+                            hepStruct.timeUseconds = reader.ReadUInt32Be();
                             break;
                         case 11:
-                            hepStruct.protocolType = _reader.ReadByte();
+                            hepStruct.protocolType = reader.ReadByte();
                             break;
                         case 12:
-                            hepStruct.captureId = _reader.ReadUInt32Be();
+                            hepStruct.captureId = reader.ReadUInt32Be();
                             break;
                         case 14:
-                            var key = _reader.ReadBytes(chunkLength - Offset);
+                            var key = reader.ReadBytes(chunkLength - Offset);
                             hepStruct.captureAuthUser = Encoding.UTF8.GetString(key);
                             break;
                         case 15:
-                            hepStruct.payloadByteMessage = _reader.ReadBytes(chunkLength - Offset);
+                            message.Payload = reader.ReadBytes(chunkLength - Offset);
                             break;
                         case 16: // compressed payload
-                            var input = _reader.ReadBytes(chunkLength - Offset);
-                            hepStruct.payloadByteMessage = ExtractBytes(input);
+                            var input = reader.ReadBytes(chunkLength - Offset);
+                            message.Payload = ExtractBytes(input);
                             break;
                         case 17:
                             hepStruct.hepCorrelationID =
-                                Encoding.UTF8.GetString(_reader.ReadBytes(chunkLength - Offset));
+                                Encoding.UTF8.GetString(reader.ReadBytes(chunkLength - Offset));
                             break;
                         default:
-                            Console.WriteLine("Unknown default chunk: [" + chunkType + "]");
-                            _reader.ReadBytes(chunkLength - Offset); // skip chunk
+                            Console.WriteLine("Unknown default chunk: [" + chunkType + "]"); //todo
+                            reader.ReadBytes(chunkLength - Offset); // skip chunk
                             break;
                     }
 
@@ -155,16 +133,14 @@ namespace Capture.Service.Parser
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
-                Console.Write(e.StackTrace);
-                Console.WriteLine("Unable RUN WORKER");
-                throw e;
+                throw new IOException("Invalid HEP payload. " + e.Message); 
             }
 
-            return hepStruct;
+            message.Hep = hepStruct;
+            return message;
         }
 
-        private static byte[] ExtractBytes(byte[] input)
+        private static byte[] ExtractBytes(byte[] input) // todo check it
         {
             MemoryStream msInner = new MemoryStream();
             MemoryStream ms = new MemoryStream(input);
@@ -178,30 +154,9 @@ namespace Capture.Service.Parser
             return msInner.ToArray();
         }
 
-        private static String IpToString(byte[] address)
+        private static string IpToString(byte[] address)
         {
             return string.Join(".", address);
-        }
-    }
-}
-
-namespace Extension
-{
-    static class BinaryReaderExtension
-    {
-        public static int ReadInt16Be(this BinaryReader r)
-        {
-            return BinaryPrimitives.ReverseEndianness(r.ReadInt16());
-        }
-
-        public static ushort ReadUInt16Be(this BinaryReader r)
-        {
-            return BinaryPrimitives.ReverseEndianness(r.ReadUInt16());
-        }
-
-        public static uint ReadUInt32Be(this BinaryReader r)
-        {
-            return BinaryPrimitives.ReverseEndianness(r.ReadUInt32());
         }
     }
 }

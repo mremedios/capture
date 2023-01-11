@@ -1,6 +1,10 @@
 ﻿using System.IO;
 using Capture.Service;
+using Capture.Service.Database;
 using Capture.Service.Listener;
+using Capture.Service.NameLater;
+using Capture.Service.Parser;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,8 +20,10 @@ var builder = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         services.AddSingleton<ICapture, UdpCapture>();
-        services.AddSingleton<ICapture, TcpCapture>();
+        // services.AddSingleton<ICapture, TcpCapture>();
         services.AddHostedService<HostedService>();
+        services.AddDbContext<JsonContext>();
+        services.AddSingleton<IHandler, Handler>();
     })
     .ConfigureLogging((_, configLogging) =>
     {

@@ -41,6 +41,5 @@
     <ItemGroup>
       <ProjectReference Include="..\Application\capture\Capture.csproj" />
     </ItemGroup>
-    
 
 </Project>

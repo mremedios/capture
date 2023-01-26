@@ -9,14 +9,6 @@ namespace Capture.Service.Parser
     public static class ParserHePv3
     {
         private const int Offset = 6;
-        private static (string, string) ParseUnknownHeader(string str)
-        {
-            var x = str.Split(':');
-            x[0] = x[0].Replace("I-", "").Replace("X-", "");
-
-            return (x[0].ToLower().Trim(), x[1].Trim());
-        }
-        
         public static Message ParseMessage(byte[] msg)
         {
             var reader = new BinaryReader(new MemoryStream(msg));
@@ -28,22 +20,14 @@ namespace Capture.Service.Parser
             var message = Parse(reader, length);
 
             var payload = SIPSorcery.SIP.SIPMessageBuffer.ParseSIPMessage(message.Payload, null, null);
-            var headers = SIPSorcery.SIP.SIPHeader.ParseSIPHeaders(payload.SIPHeaders);
-            message.Headers = new();
-            foreach (var h in headers.UnknownHeaders)
-            {
-                var (key, value) = ParseUnknownHeader(h);
-                message.Headers[key] = value;
-            }
-
-            message.Sip = headers;
+            message.Sip = SIPSorcery.SIP.SIPHeader.ParseSIPHeaders(payload.SIPHeaders);
 
             return message;
         }
 
         private static Message Parse(BinaryReader reader, int totalLength)
         {
-            var hepStruct = new HEPStructure();
+            var hepStruct = new HEPHeader();
             var message = new Message();
             try
             {

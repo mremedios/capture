@@ -61,7 +61,7 @@ namespace Capture.Service.Listener
                     var x = await _listener.ReceiveAsync(_cts.Token);
                     _logger.LogInformation("Handle message from {}" ,x.RemoteEndPoint);
                     
-                    _handler.HandleMessage(x.Buffer);
+                    _handler.HandleMessage(new ReceivedData(x.Buffer, x.RemoteEndPoint, DateTime.Now));
                 }
             }
             catch (Exception e)

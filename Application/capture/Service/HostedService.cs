@@ -14,7 +14,7 @@ public class HostedService : IHostedService
 	private readonly ICapture[] _captures;
 	private CancellationTokenSource _cts;
 
-	public HostedService(IConfiguration config, ILogger<UdpCapture> logger, IEnumerable<ICapture> captures)
+	public HostedService(IConfiguration config, ILogger<HostedService> logger, IEnumerable<ICapture> captures)
 	{
 		_captures = captures.ToArray();
 	}

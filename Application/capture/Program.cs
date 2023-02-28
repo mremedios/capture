@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Capture.Service;
 using Capture.Service.Database;
+using Capture.Service.Database.Calls;
 using Capture.Service.Database.JsonHeaders;
 using Capture.Service.Listener;
 using Capture.Service.NameLater;
@@ -23,7 +24,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddSingleton<ICapture, UdpCapture>();
         // services.AddSingleton<ICapture, TcpCapture>();
         services.AddHostedService<HostedService>();
-        services.AddSingleton<IHeaderRepository, JsonRepository>();
+        services.AddSingleton<IHeaderRepository, CallsRepository>();
         services.AddSingleton<IHandler, Handler>();
     })
     .ConfigureLogging((_, configLogging) =>

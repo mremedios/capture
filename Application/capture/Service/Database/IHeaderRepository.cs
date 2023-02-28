@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Capture.Service.NameLater;
 
@@ -5,9 +6,9 @@ namespace Capture.Service.Database;
 
 public interface IHeaderRepository
 {
-    public Task Insert(NameIt nameIt);
+    public Task InsertRangeAsync(IList<NameIt> nameIt);
 
-    public string[] Select();
+    public string[] FindByHeader(string key, string value);
 
     public string[] AvailableHeaders();
 }

@@ -23,11 +23,9 @@ public class HostedService : IHostedService
 	{
 		_cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-		var startTasks = _captures.Select(x => x.StartAsync(_cts.Token));
+		var startTasks = _captures.Select(x => x.StartAsync(_cts.Token)).ToArray();
 
-		//Напомни, скину ссылку на безопасный WhenAll
-
-		return Task.WhenAll(startTasks);
+		return startTasks.Length == 0 ? Task.CompletedTask : Task.WhenAll(startTasks);
 	}
 
 	public Task StopAsync(CancellationToken cancellationToken)

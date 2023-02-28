@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Capture.Service.NameLater;
@@ -8,13 +9,13 @@ namespace Capture.Service.Database.JsonHeaders;
 
 public class JsonRepository : IHeaderRepository
 {
-    public async Task Insert(NameIt nameIt)
+    public async Task InsertRangeAsync(IList<NameIt> nameIt)
     {
         using (var ctx = new JsonContext())
         {
             try
             {
-                await ctx.AddAsync(GetHeader(nameIt));
+                await ctx.AddRangeAsync(nameIt.Select(GetHeader));
                 await ctx.SaveChangesAsync();
             }
             catch (Exception e)
@@ -24,11 +25,11 @@ public class JsonRepository : IHeaderRepository
         }
     }
 
-    public string[] Select()
+    public string[] FindByHeader(string key, string value)
     {
         using (var ctx = new JsonContext())
         {
-            var search = "[{\"tcommuniactionid\": \"b5d3756cbd3b43929a9422796d1db48a\"}]";
+            var search = $"\"{key}\": \"{value}\"";
             var res = ctx.Headers
                 .Where(h => EF.Functions.JsonContains(h.protocol_header, search))
                 .ToList();
@@ -40,11 +41,7 @@ public class JsonRepository : IHeaderRepository
     {
         using (var ctx = new JsonContext())
         {
-
-            var n = ctx.AvailableHeaders.FirstOrDefault();
-            var a = ctx.AvailableHeaders.Where(x => true).ToArray();
-            var b = a.Select(x => x.Header);
-            return b.ToArray();
+            return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
         }
     }
     
@@ -54,7 +51,7 @@ public class JsonRepository : IHeaderRepository
         {
             created_date = nameIt.Time,
             call_id = nameIt.CallId,
-            endpoint = nameIt.ServerIp.ToString(),
+            endpoint = nameIt.Host.ToString(),
             raw = System.Text.Encoding.Default.GetString(nameIt.SipMessage),
             protocol_header = nameIt.Headers
         };

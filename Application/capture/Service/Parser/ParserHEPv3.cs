@@ -21,7 +21,7 @@ namespace Capture.Service.Parser
 
             var payload = SIPSorcery.SIP.SIPMessageBuffer.ParseSIPMessage(message.Payload, null, null);
             message.Sip = SIPSorcery.SIP.SIPHeader.ParseSIPHeaders(payload.SIPHeaders);
-
+            
             return message;
         }
 

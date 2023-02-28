@@ -5,7 +5,7 @@ create table sources
 (
     created_date    timestamp with time zone default current_timestamp not null,
     endpoint        varchar(20)                                        not null,
-    call_id         varchar(50)                                        not null,
+    call_id         varchar(100)                                       not null,
     protocol_header jsonb                                              not null,
     raw             varchar                                            not null
 );
@@ -19,4 +19,10 @@ create table available_headers
 (
     header varchar not null,
     unique (header)
-)
+);
+
+--changeset test:insert sample values
+insert into available_headers(header)
+values ('callid'),
+       ('callsessionid'),
+       ('tcommuniactionid')

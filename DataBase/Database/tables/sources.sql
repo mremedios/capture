@@ -1,9 +1,11 @@
 --liquibase formatted sql
---changeset test:2
-create table sources (
-    raw_id bigserial not null,
-    created_date timestamp with time zone default current_timestamp not null,
-    protocol_header jsonb NOT NULL,
-    raw varchar not null,
-    unique(raw_id)
-)
+--changeset calls
+CREATE TABLE calls
+(
+    local_call_id BIGSERIAL                                          NOT NULL,
+    created       TIMESTAMP WITH time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    host          VARCHAR(20)                                        NOT NULL,
+    call_id       VARCHAR(100)                                       NOT NULL,
+    PRIMARY KEY (local_call_id)
+); 
+

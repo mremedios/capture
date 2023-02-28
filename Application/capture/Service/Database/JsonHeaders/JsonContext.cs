@@ -15,14 +15,13 @@ namespace Capture.Service.Database.JsonHeaders
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql("Host=localhost;Database=capture-json;"); //todo 
-            // optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-            optionsBuilder.LogTo()
+            optionsBuilder.LogTo(Console.WriteLine);
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); // ето что
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Header>()
-                // .HasNoKey()
                 .ToTable("sources")
                 .Property(p => p.protocol_header)
                 .HasConversion(
@@ -33,7 +32,7 @@ namespace Capture.Service.Database.JsonHeaders
 
     public class Header
     {
-        [Key] public DateTime created_date { get; set; } = DateTime.UtcNow;
+        [Key] public DateTime created_date { get; set; }
         
          public string call_id { get; set; } // todo return key
         

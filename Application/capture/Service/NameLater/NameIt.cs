@@ -4,11 +4,11 @@ using System.Net;
 
 namespace Capture.Service.NameLater;
 
-public record struct NameIt
+public record NameIt
 (
     Dictionary<string, string> Headers,
     byte[] SipMessage,
     string CallId,
-    IPEndPoint ServerIp,
+    IPEndPoint Host,
     DateTime Time
 );

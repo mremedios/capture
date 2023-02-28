@@ -1,7 +1,13 @@
 --liquibase formatted sql
---changeset test:1
-create table available_headers (
-    header_id smallserial not null,
-    header varchar not null,
-    unique(header_id)
-)
+--changeset available_headers
+CREATE TABLE available_headers
+(
+    header VARCHAR(100) NOT NULL,
+    UNIQUE (header)
+);
+
+--changeset insert sample values in available_headers
+INSERT INTO available_headers (header)
+VALUES ('callid'),
+       ('callsessionid'),
+       ('tcommuniactionid') 

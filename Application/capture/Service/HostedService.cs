@@ -6,31 +6,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Capture.Service.Handler;
 
 namespace Capture.Service;
 
 public class HostedService : IHostedService
 {
-	private readonly ICapture[] _captures;
-	private CancellationTokenSource _cts;
+    private readonly ICapture[] _captures;
+    private CancellationTokenSource _cts;
+    private IHandler _handler;
 
-	public HostedService(IConfiguration config, ILogger<HostedService> logger, IEnumerable<ICapture> captures)
-	{
-		_captures = captures.ToArray();
-	}
+    public HostedService(IConfiguration config, ILogger<HostedService> logger, IEnumerable<ICapture> captures,
+        IHandler handler)
+    {
+        _captures = captures.ToArray();
+        _handler = handler;
+    }
 
-	public Task StartAsync(CancellationToken cancellationToken)
-	{
-		_cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-		var startTasks = _captures.Select(x => x.StartAsync(_cts.Token)).ToArray();
+        var startTasks = _captures.Select(x => x.StartAsync(_cts.Token))
+            .ToArray();
 
-		return startTasks.Length == 0 ? Task.CompletedTask : Task.WhenAll(startTasks);
-	}
+        return startTasks.Length == 0 ? Task.CompletedTask : Task.WhenAll(startTasks);
+    }
 
-	public Task StopAsync(CancellationToken cancellationToken)
-	{
-		_cts.Cancel();
-		return Task.CompletedTask;
-	}
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        _cts.Cancel();
+        return Task.CompletedTask;
+    }
 }

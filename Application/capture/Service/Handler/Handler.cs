@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Capture.Service.Database;
 using Capture.Service.Listener;
@@ -9,14 +10,14 @@ using Capture.Service.TaskQueue;
 using Microsoft.Extensions.Logging;
 using SIPSorcery.SIP;
 
-namespace Capture.Service.NameLater;
+namespace Capture.Service.Handler;
 
 public class Handler : IHandler
 {
     private readonly ILogger<Handler> _logger;
     private readonly IHeaderRepository _repository;
-    private readonly TaskQueue<ReceivedData> _parseQueue; 
-    private readonly BufferedTaskQueue<NameIt> _dbQueue;
+    private readonly TaskQueue<ReceivedData> _parseQueue;
+    private readonly BufferedTaskQueue<Data> _dbQueue;
     private ISet<string> _availableHeaders;
 
     public Handler(ILogger<Handler> logger, IHeaderRepository repository)
@@ -24,32 +25,43 @@ public class Handler : IHandler
         _logger = logger;
         _repository = repository;
         _parseQueue = new TaskQueue<ReceivedData>(Parse, ErrorHandler);
-        _dbQueue = new BufferedTaskQueue<NameIt>(Save, bufferSize: 10);
-        _availableHeaders = new HashSet<string>(_repository.AvailableHeaders()); // а так можно?
+        _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: 10);
+        // UpdateHeaders();
     }
+
+    public async Task UpdateHeaders()
+    {
+        var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+        while (await timer.WaitForNextTickAsync())
+        {
+            _availableHeaders = new HashSet<string>(_repository.AvailableHeaders());
+        }
+    }
+
     private void Parse(ReceivedData data)
     {
         var message = ParserHePv3.ParseMessage(data.Msg);
         var nameIt = GetNameIt(message, data.EndPoint, data.Time);
         _dbQueue.EnqueueTask(nameIt);
     }
+
     private void ErrorHandler(Exception e, ReceivedData y)
     {
-        _logger.LogWarning("Smth went wrong {}", e.Message);
+        //  Object reference not set to an instance of an object
+        _logger.LogWarning("Smth went wrong {0}", e.Message);
     }
 
-    private async Task Save(IList<NameIt> nameIts)
+    private async Task Save(IList<Data> data)
     {
-        _availableHeaders = new HashSet<string>(_repository.AvailableHeaders());
-        await _repository.InsertRangeAsync(nameIts);
+        await _repository.InsertRangeAsync(data);
     }
-    
-    public void HandleMessage(ReceivedData data) // todo void?
+
+    public void HandleMessage(ReceivedData data)
     {
         _parseQueue.EnqueueTask(data);
     }
 
-    private NameIt GetNameIt(Message msg, IPEndPoint endPoint, DateTime Time)
+    private Data GetNameIt(Message msg, IPEndPoint endPoint, DateTime Time)
     {
         Dictionary<string, string> headers = new();
         foreach (var h in msg.Sip.UnknownHeaders)
@@ -61,7 +73,7 @@ public class Handler : IHandler
             }
         }
 
-        return new NameIt(
+        return new Data(
             headers,
             msg.Payload,
             msg.Sip.CallId,
@@ -75,6 +87,4 @@ public class Handler : IHandler
         x[0] = x[0].Replace("I-", "").Replace("X-", "");
         return (x[0].ToLower().Trim(), x[1].Trim());
     }
-    
 }
-

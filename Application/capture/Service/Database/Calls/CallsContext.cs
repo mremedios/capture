@@ -1,12 +1,9 @@
+using System;
+using Capture.Service.Database.Calls.Entities;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace Capture.Service.Database.Calls;
-
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using Capture.Service.Database.Calls.Entities;
 
 public class CallsContext : DbContext
 {
@@ -19,18 +16,13 @@ public class CallsContext : DbContext
     {
         var dataSourceBuilder = new NpgsqlDataSourceBuilder("Host=localhost;Database=capture;");
         dataSourceBuilder.MapComposite<Header>("headertype");
+
         var dataSource = dataSourceBuilder.Build();
+
+        optionsBuilder.UseNpgsql(dataSource)
+            .LogTo(Console.WriteLine)
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         
-        optionsBuilder.UseNpgsql(dataSource); //todo 
-        optionsBuilder.LogTo(Console.WriteLine);
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-        // NpgsqlConnection.GlobalTypeMapper.MapComposite<Header>("headertype"); // todo deprecated
     }
-}
-
-
-[Table("available_headers")]
-public class AvailableHeader
-{
-    [Key, Column("header")] public string Header { get; set; }
 }

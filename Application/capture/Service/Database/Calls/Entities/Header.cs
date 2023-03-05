@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 public class Header
 {
     public string header { get; set; }
-    [Column("value")] public string Value { get; set; }
-    [Column("local_call_id")] public int LocalCallId { get; set; }
+    
+    [Column("value")] 
+    public string Value { get; set; }
+    
+    [Column("local_call_id")] 
+    public int LocalCallId { get; set; }
 }

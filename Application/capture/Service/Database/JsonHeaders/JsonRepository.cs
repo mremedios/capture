@@ -1,21 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Capture.Service.NameLater;
+using Capture.Service.Database.JsonHeaders.Entities;
+using Capture.Service.Handler;
 using Microsoft.EntityFrameworkCore;
 
 namespace Capture.Service.Database.JsonHeaders;
 
 public class JsonRepository : IHeaderRepository
 {
-    public async Task InsertRangeAsync(IList<NameIt> nameIt)
+    public async Task InsertRangeAsync(IList<Data> rawMessages)
     {
         using (var ctx = new JsonContext())
         {
             try
             {
-                await ctx.AddRangeAsync(nameIt.Select(GetHeader));
+                await ctx.AddRangeAsync(rawMessages.Select(GetHeader));
                 await ctx.SaveChangesAsync();
             }
             catch (Exception e)
@@ -45,15 +47,15 @@ public class JsonRepository : IHeaderRepository
         }
     }
     
-    private static Header GetHeader(NameIt nameIt)
+    private static Header GetHeader(Data data)
     {
         return new Header
         {
-            created_date = nameIt.Time,
-            call_id = nameIt.CallId,
-            endpoint = nameIt.Host.ToString(),
-            raw = System.Text.Encoding.Default.GetString(nameIt.SipMessage),
-            protocol_header = nameIt.Headers
+            created_date = data.Time,
+            call_id = data.CallId,
+            endpoint = data.Host.ToString(),
+            raw = Encoding.Default.GetString(data.SipMessage),
+            protocol_header = data.Headers
         };
     }
     

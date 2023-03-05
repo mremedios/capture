@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 
-namespace Capture.Service.NameLater;
+namespace Capture.Service.Handler;
 
-public record NameIt
+public record Data
 (
     Dictionary<string, string> Headers,
     byte[] SipMessage,

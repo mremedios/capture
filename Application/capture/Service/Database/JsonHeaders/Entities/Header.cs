@@ -7,7 +7,8 @@ namespace Capture.Service.Database.JsonHeaders.Entities;
 
 public class Header
 {
-    [Key] public DateTime created_date { get; set; }
+    [Key] 
+    public DateTime created_date { get; set; }
 
     public string call_id { get; set; } // todo return key
 

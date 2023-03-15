@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Capture.Service.Database.Calls.Entities;
+namespace Capture.Service.Database.Calls.Models;
 
 [Table("calls")]
 public class Call

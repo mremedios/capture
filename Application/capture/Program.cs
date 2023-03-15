@@ -18,11 +18,12 @@ var builder = Host.CreateDefaultBuilder(args)
     })
     .ConfigureServices(services =>
     {
-        services.AddSingleton<ICapture, UdpCapture>();
-        // services.AddSingleton<ICapture, TcpCapture>();
-        services.AddHostedService<HostedService>();
-        services.AddSingleton<IHeaderRepository, CallsRepository>();
-        services.AddSingleton<IHandler, Handler>();
+        services.AddSingleton<ICapture, UdpCapture>()
+            .AddHostedService<HostedService>()
+            .AddSingleton<IHeaderRepository, CallsRepository>()
+            .AddSingleton<IHandler, Handler>()
+            .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
+            .AddSingleton<IAvailableHeadersRepository, AvailableHeadersRepository>();
     })
     .ConfigureLogging((_, configLogging) =>
     {

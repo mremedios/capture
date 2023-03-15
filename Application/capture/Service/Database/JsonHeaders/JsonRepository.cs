@@ -39,14 +39,6 @@ public class JsonRepository : IHeaderRepository
         }
     }
 
-    public string[] AvailableHeaders()
-    {
-        using (var ctx = new JsonContext())
-        {
-            return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
-        }
-    }
-    
     private static Header GetHeader(Data data)
     {
         return new Header
@@ -58,5 +50,4 @@ public class JsonRepository : IHeaderRepository
             protocol_header = data.Headers
         };
     }
-    
 }

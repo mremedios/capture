@@ -6,6 +6,5 @@ namespace Capture.Service.Handler;
 public interface IHandler
 {
     public void HandleMessage(ReceivedData data);
-
-    public Task UpdateHeaders();
+    
 }

@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 namespace Capture.Service.Listener
 {
-	public interface ICapture : IDisposable
-	{ 
-		Task StartAsync(CancellationToken ct);
-	}
+    public interface ICapture : IDisposable
+    {
+        Task StartAsync(CancellationToken ct);
+    }
 }

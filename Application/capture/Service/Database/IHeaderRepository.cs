@@ -7,8 +7,5 @@ namespace Capture.Service.Database;
 public interface IHeaderRepository
 {
     public Task InsertRangeAsync(IList<Data> rawMessages);
-
-    public string[] FindByHeader(string key, string value);
-
-    public string[] AvailableHeaders();
+    
 }

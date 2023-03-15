@@ -5,13 +5,6 @@ namespace Test;
 
 public class QueriesTest
 {
-    [Test]
-    public void AvailableHSelect()
-    {
-        var repo = new JsonRepository();
-        var res = repo.AvailableHeaders();
-        Assert.That(res, Is.EqualTo(new[] { "callid", "callsessionid", "tcommuniactionid" }));
-    }
 
     [Test]
     public void CustomIdSelect()

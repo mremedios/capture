@@ -1,5 +1,5 @@
 using System;
-using Capture.Service.Database.Calls.Entities;
+using Capture.Service.Database.Calls.Models;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
@@ -12,17 +12,24 @@ public class CallsContext : DbContext
     public DbSet<Message> Messages { get; set; }
     public DbSet<AvailableHeader> AvailableHeaders { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    
+    public CallsContext(DbContextOptions options) : base(options)
     {
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder("Host=localhost;Database=capture;");
-        dataSourceBuilder.MapComposite<Header>("headertype");
 
-        var dataSource = dataSourceBuilder.Build();
-
-        optionsBuilder.UseNpgsql(dataSource)
-            .LogTo(Console.WriteLine)
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-        
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
+    
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // {
+    //     var dataSourceBuilder = new NpgsqlDataSourceBuilder("Host=localhost;Database=capture;");
+    //     dataSourceBuilder.MapComposite<Header>("header_type");
+    //
+    //     var dataSource = dataSourceBuilder.Build();
+    //
+    //     optionsBuilder.UseNpgsql(dataSource)
+    //         .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Error)
+    //         .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+    //     
+    //     AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+    // }
+    
 }

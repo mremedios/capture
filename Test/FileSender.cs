@@ -13,7 +13,7 @@ public class FileSender
     {
         try
         {
-            var buffer = new byte[32768];
+            var buffer = new byte[16383];
             var last = string.Empty;
             int read;
             while ((read = input.Read(buffer)) > 0)

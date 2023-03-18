@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Capture.Service.Listener
+namespace Capture.Service
 {
     public interface ICapture : IDisposable
     {

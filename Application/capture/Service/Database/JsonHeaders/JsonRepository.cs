@@ -27,6 +27,11 @@ public class JsonRepository : IHeaderRepository
         }
     }
 
+    public string[] FindAvailableHeaders()
+    {
+        throw new NotImplementedException();
+    }
+
     public string[] FindByHeader(string key, string value)
     {
         using (var ctx = new JsonContext())

@@ -16,9 +16,9 @@ public class Handler : IHandler
     private readonly IHeaderRepository _repository;
     private readonly TaskQueue<ReceivedData> _parseQueue;
     private readonly BufferedTaskQueue<Data> _dbQueue;
-    private readonly IAvailableHeadersRepository _ahRepo;
+    private readonly IHeadersProvider _ahRepo;
 
-    public Handler(ILogger<Handler> logger, IHeaderRepository repository, IAvailableHeadersRepository ahRepo)
+    public Handler(ILogger<Handler> logger, IHeaderRepository repository, IHeadersProvider ahRepo)
     {
         _logger = logger;
         _repository = repository;

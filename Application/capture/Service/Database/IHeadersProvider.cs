@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace Capture.Service.Database;
 
-// называется как-то упорото
-public interface IAvailableHeadersRepository
+public interface IHeadersProvider
 {
     public ISet<string> GetAvailableHeaders();
 
     public Task StartAsync(CancellationToken ct);
+    
     public Task StopAsync(CancellationToken ct);
 }

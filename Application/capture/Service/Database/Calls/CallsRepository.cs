@@ -36,6 +36,12 @@ public class CallsRepository : IHeaderRepository
             await ctx1.SaveChangesAsync();
         }
     }
+    
+    public string[] FindAvailableHeaders()
+    {
+        using var ctx = _contextFactory.CreateContext();
+        return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
+    }
 
     private Call InsertAndGetCall(CallsContext ctx, Data data)
     {

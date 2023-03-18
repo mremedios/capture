@@ -23,7 +23,7 @@ var builder = Host.CreateDefaultBuilder(args)
             .AddSingleton<IHeaderRepository, CallsRepository>()
             .AddSingleton<IHandler, Handler>()
             .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
-            .AddSingleton<IAvailableHeadersRepository, AvailableHeadersRepository>();
+            .AddSingleton<IHeadersProvider, HeadersProvider>();
     })
     .ConfigureLogging((_, configLogging) =>
     {

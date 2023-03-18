@@ -14,13 +14,13 @@ namespace Capture.Service;
 public class HostedService : IHostedService
 {
     private readonly ICapture[] _captures;
-    private readonly IAvailableHeadersRepository _rep;
+    private readonly IHeadersProvider _provider;
     private CancellationTokenSource _cts;
 
-    public HostedService(IEnumerable<ICapture> captures, IAvailableHeadersRepository rep)
+    public HostedService(IEnumerable<ICapture> captures, IHeadersProvider provider)
     {
         _captures = captures.ToArray();
-        _rep = rep;
+        _provider = provider;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -29,7 +29,7 @@ public class HostedService : IHostedService
 
         var startTasks = _captures
             .Select(x => x.StartAsync(_cts.Token))
-            .Append(_rep.StartAsync(_cts.Token))
+            .Append(_provider.StartAsync(_cts.Token))
             .ToArray();
 
         return startTasks.Length == 0 ? Task.CompletedTask : Task.WhenAll(startTasks);
@@ -38,7 +38,7 @@ public class HostedService : IHostedService
     public Task StopAsync(CancellationToken cancellationToken)
     {
         _cts.Cancel();
-        _rep.StopAsync(cancellationToken);
+        _provider.StopAsync(cancellationToken);
         return Task.CompletedTask;
     }
 }

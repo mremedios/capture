@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace Capture.Service.Database.Calls;
 
-public class AvailableHeadersRepository: IAvailableHeadersRepository
+public class HeadersProvider: IHeadersProvider
 {
     private ISet<string> _availableHeaders = new HashSet<string>();
-    private readonly IContextFactory _contextFactory;
+    private readonly IHeaderRepository _repo;
     private Timer _timer;
     
-    public AvailableHeadersRepository(IContextFactory contextFactory)
+    public HeadersProvider(IHeaderRepository repository)
     {
-        _contextFactory = contextFactory;
+        _repo = repository;
     }
 
     public Task StartAsync(CancellationToken ct)
     {
         _timer = new Timer((e) =>
         {
-            var nv = new HashSet<string>(FindAll());
+            var nv = new HashSet<string>(_repo.FindAvailableHeaders());
             Interlocked.Exchange(ref _availableHeaders, nv);
         }, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));  
         
@@ -33,12 +33,6 @@ public class AvailableHeadersRepository: IAvailableHeadersRepository
         _timer.Change(Timeout.Infinite, 0);
         _timer.Dispose();
         return Task.CompletedTask;
-    }
-
-    private string[] FindAll()
-    {
-        using var ctx = _contextFactory.CreateContext();
-        return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
     }
 
     public ISet<string> GetAvailableHeaders()

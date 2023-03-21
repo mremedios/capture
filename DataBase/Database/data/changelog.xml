@@ -16,40 +16,5 @@
     </loadData>
   </changeSet>
 
-  <changeSet author="vait" id="data-002-activity_type">
-    <loadData file="activity_type.csv" quotchar="'" relativeToChangelogFile="true" separator=";" tableName="activity_type">
-      <column name="activity_type_id" type="NUMERIC"/>
-      <column name="activity_type" type="STRING"/>
-    </loadData>
-  </changeSet>
-
-  <changeSet author="vait" id="data-003-equipment">
-    <loadData file="equipment.csv" quotchar="'" relativeToChangelogFile="true" separator=";" tableName="equipment">
-      <column name="equipment_id" type="NUMERIC"/>
-      <column name="name" type="STRING"/>
-    </loadData>
-  </changeSet>
-
-  <changeSet author="vait" id="data-004-equipment_activity_type">
-    <loadData file="equipment_activity_type.csv" quotchar="'" relativeToChangelogFile="true" separator=";" tableName="equipment_activity_type">
-      <column name="equipment_id" type="NUMERIC"/>
-      <column name="activity_type_id" type="NUMERIC"/>
-    </loadData>
-  </changeSet>
-
-  <changeSet author="vait" id="data-005-equipment_tags">
-    <loadData file="equipment_tags.csv" quotchar="'" relativeToChangelogFile="true" separator=";" tableName="equipment_tags">
-      <column name="equipment_id" type="NUMERIC"/>
-      <column name="tag_id" type="NUMERIC"/>
-    </loadData>
-  </changeSet>
-
-  <changeSet author="vait" id="data-006-service_history">
-    <loadData file="service_history.csv" quotchar="'" relativeToChangelogFile="true" separator=";" tableName="service_history">
-      <column name="equipment_id" type="NUMERIC"/>
-      <column name="last_service_date" type="DATE" />
-    </loadData>
-  </changeSet>
-
 </databaseChangeLog>
 

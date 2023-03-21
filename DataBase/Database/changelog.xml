@@ -8,9 +8,8 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
     http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
     http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
-
-
+  
   <include file="tables/changelog.xml" relativeToChangelogFile="true" labels="Tables"/>
-  <include file="data/changelog.xml" relativeToChangelogFile="true" labels="Data"/>
+
 </databaseChangeLog>
 

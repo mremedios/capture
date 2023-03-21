@@ -1,5 +1,8 @@
 ﻿using System.IO;
 using Capture.Service;
+using Capture.Service.Database;
+using Capture.Service.Database.Calls;
+using Capture.Service.Handler;
 using Capture.Service.Listener;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,9 +18,12 @@ var builder = Host.CreateDefaultBuilder(args)
     })
     .ConfigureServices(services =>
     {
-        services.AddSingleton<ICapture, UdpCapture>();
-        services.AddSingleton<ICapture, TcpCapture>();
-        services.AddHostedService<HostedService>();
+        services.AddSingleton<ICapture, UdpCapture>()
+            .AddHostedService<HostedService>()
+            .AddSingleton<IHeaderRepository, CallsRepository>()
+            .AddSingleton<IHandler, Handler>()
+            .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
+            .AddSingleton<IHeadersProvider, HeadersProvider>();
     })
     .ConfigureLogging((_, configLogging) =>
     {

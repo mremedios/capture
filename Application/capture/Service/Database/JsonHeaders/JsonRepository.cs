@@ -26,17 +26,13 @@ public class JsonRepository : IHeaderRepository
             }
         }
     }
+    
 
-    public string[] FindAvailableHeaders()
-    {
-        throw new NotImplementedException();
-    }
-
-    public string[] FindByHeader(string key, string value)
+    public string[] FindByHeader(string value)
     {
         using (var ctx = new JsonContext())
         {
-            var search = $"\"{key}\": \"{value}\"";
+            var search = $"\"callid\": \"{value}\"";
             var res = ctx.Headers
                 .Where(h => EF.Functions.JsonContains(h.protocol_header, search))
                 .ToList();

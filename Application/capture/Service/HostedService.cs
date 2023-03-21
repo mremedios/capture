@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Capture.Service.Database;
 using Capture.Service.Handler;
+using Capture.Service.Handler.provider;
 
 namespace Capture.Service;
 

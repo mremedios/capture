@@ -9,19 +9,5 @@ namespace Test;
 
 public class CallsTest
 {
-    // [Test]
-    // public async Task StoredProcedure()
-    // {
-    //     var header = new Header
-    //     {
-    //         HeaderName = "name5",
-    //         LocalCallId = 15936,
-    //         Value = "value"
-    //     };
-    //     Header[] arr = { header, header, header };
-    //     
-    //     var ctx = new CallsContext();
-    //
-    //     await Capture.Service.Database.Calls.StoredProcedure.CallProcedure(ctx, "insert_data", arr);
-    // }
+
 }

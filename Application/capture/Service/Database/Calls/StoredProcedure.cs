@@ -7,19 +7,18 @@ using Npgsql;
 
 namespace Capture.Service.Database.Calls;
 
-public static class StoredProcedure
+public static class ContextExtension
 {
-    public static async Task CallProcedure(CallsContext ctx, string procedureName, Header[] data)
+    public static async Task StoredProcedure(this CallsContext ctx, string procedureName, Header[] data)
     {
         var connection = (NpgsqlConnection)ctx.Database.GetDbConnection();
         
-
         using var command = new NpgsqlCommand(procedureName, connection)
         {
             CommandType = CommandType.StoredProcedure,
             Parameters =
             {
-                new NpgsqlParameter { Value = data}
+                new NpgsqlParameter { Value = data }
             }
         };
 

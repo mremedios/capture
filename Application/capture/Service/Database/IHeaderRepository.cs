@@ -8,6 +8,5 @@ public interface IHeaderRepository
 {
     public Task InsertRangeAsync(IList<Data> rawMessages);
 
-    public string[] FindAvailableHeaders();
-
+    public string[] FindByHeader(string header);
 }

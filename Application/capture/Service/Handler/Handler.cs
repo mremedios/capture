@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Capture.Service.Database;
+using Capture.Service.Handler.provider;
 using Capture.Service.Listener;
 using Capture.Service.Parser;
 using Capture.Service.TaskQueue;
@@ -16,15 +17,15 @@ public class Handler : IHandler
     private readonly IHeaderRepository _repository;
     private readonly TaskQueue<ReceivedData> _parseQueue;
     private readonly BufferedTaskQueue<Data> _dbQueue;
-    private readonly IHeadersProvider _ahRepo;
+    private readonly IHeadersProvider _provider;
 
-    public Handler(ILogger<Handler> logger, IHeaderRepository repository, IHeadersProvider ahRepo)
+    public Handler(ILogger<Handler> logger, IHeaderRepository repository, IHeadersProvider provider)
     {
         _logger = logger;
         _repository = repository;
         _parseQueue = new TaskQueue<ReceivedData>(Parse, ParsingErrorHandler);
         _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: 1000, exceptionHandler: SavingErrorHandler);
-        _ahRepo = ahRepo;
+        _provider = provider;
     }
 
     private void Parse(ReceivedData data)
@@ -60,7 +61,7 @@ public class Handler : IHandler
         foreach (var h in msg.Sip.UnknownHeaders)
         {
             var (key, value) = ParseUnknownHeader(h);
-            if (_ahRepo.GetAvailableHeaders().Contains(key))
+            if (_provider.GetAvailableHeaders().Contains(key))
             {
                 headers[key] = value;
             }

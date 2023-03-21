@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Capture.Service.Database.Calls.Models;
 using Capture.Service.Handler;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Capture.Service.Database.Calls;
 
@@ -26,21 +27,31 @@ public class CallsRepository : IHeaderRepository
 
     public async Task InsertRangeAsync(IList<Data> rawMessages)
     {
-        using (var ctx1 = CreateContext())
+        using (var ctx = CreateContext())
         {
-            var calls = rawMessages.Select(x => (x, InsertAndGetCall(ctx1, x).LocalCallId)).ToList();
+            var calls = rawMessages.Select(x => (x, InsertAndGetCall(ctx, x).LocalCallId)).ToList();
 
-            await PutMessages(ctx1, calls);
-            await PutHeaders(ctx1, calls);
+            await PutMessages(ctx, calls);
+            await PutHeaders(ctx, calls);
 
-            await ctx1.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
         }
     }
-    
-    public string[] FindAvailableHeaders()
+
+    public string[] FindByHeader(string header)
     {
-        using var ctx = _contextFactory.CreateContext();
-        return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
+        using var ctx = CreateContext();
+        var y =
+            ctx
+                .Headers.Where(h => h.Value == header)
+                .Join(
+                    ctx.Messages,
+                    h => h.LocalCallId,
+                    m => m.LocalCallId,
+                    (h, m) =>
+                        m.Text
+                );
+        return y.ToArray();
     }
 
     private Call InsertAndGetCall(CallsContext ctx, Data data)
@@ -91,7 +102,7 @@ public class CallsRepository : IHeaderRepository
         await ctx.AddRangeAsync(messages);
     }
 
-    private async Task PutHeaders(CallsContext ctx,  IList<(Data, int)> calls)
+    private async Task PutHeaders(CallsContext ctx, IList<(Data, int)> calls)
     {
         var headers = calls.SelectMany(x =>
             {
@@ -106,6 +117,6 @@ public class CallsRepository : IHeaderRepository
             }
         ).ToArray();
 
-        await StoredProcedure.CallProcedure(ctx, "insert_headers", headers);
+        await ctx.StoredProcedure("insert_headers", headers);
     }
 }

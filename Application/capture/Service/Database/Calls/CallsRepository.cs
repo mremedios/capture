@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Transactions;
 using Capture.Service.Database.Calls.Models;
-using Capture.Service.Handler;
-using Microsoft.EntityFrameworkCore.Internal;
+using Capture.Service.Models;
 
 namespace Capture.Service.Database.Calls;
 
@@ -38,20 +36,27 @@ public class CallsRepository : IHeaderRepository
         }
     }
 
-    public string[] FindByHeader(string header)
+    public ShortData[] FindByHeader(string header)
     {
         using var ctx = CreateContext();
-        var y =
+        var messages =
             ctx
                 .Headers.Where(h => h.Value == header)
                 .Join(
                     ctx.Messages,
                     h => h.LocalCallId,
                     m => m.LocalCallId,
-                    (h, m) =>
-                        m.Text
+                    (h, m) => m
                 );
-        return y.ToArray();
+
+        var shortMsg = messages.ToList().Select(m =>
+            new ShortData(
+                m.Text,
+                JsonSerializer.Deserialize<Details>(m.Details)
+            )
+        );
+
+        return shortMsg.ToArray();
     }
 
     private Call InsertAndGetCall(CallsContext ctx, Data data)
@@ -68,7 +73,7 @@ public class CallsRepository : IHeaderRepository
             return callWithId;
         }
 
-        var call = new Call { Date = data.Time, Host = data.Host.ToString(), CallId = data.CallId };
+        var call = new Call { Date = data.ReceivingTime, Host = data.Host.ToString(), CallId = data.CallId };
         ctx.Calls.Add(call);
 
         ctx.SaveChanges();
@@ -93,9 +98,9 @@ public class CallsRepository : IHeaderRepository
             var (data, localCallId) = x;
             return new Message
             {
-                Headers = JsonSerializer.Serialize(data.Headers),
-                Text = Encoding.Default.GetString(data.SipMessage),
-                LocalCallId = localCallId
+                Text = data.SipMessage,
+                LocalCallId = localCallId,
+                Details = JsonSerializer.Serialize(data.Details)
             };
         });
 
@@ -115,7 +120,7 @@ public class CallsRepository : IHeaderRepository
                         LocalCallId = localCallId
                     });
             }
-        ).ToArray();
+        ).Distinct().ToArray();
 
         await ctx.StoredProcedure("insert_headers", headers);
     }

@@ -10,8 +10,10 @@
     http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
   
   <include file="available_headers.sql" relativeToChangelogFile="true" labels="Tables"/>
-  <include file="sources.sql" relativeToChangelogFile="true" labels="Tables"/>
+  <include file="calls.sql" relativeToChangelogFile="true" labels="Tables"/>
   <include file="headers.sql" relativeToChangelogFile="true" labels="Tables"/>
+  <include file="messages.sql" relativeToChangelogFile="true" labels="Tables"/>
+  <include file="procedures.sql" relativeToChangelogFile="true" labels="Tables"/>
   
 </databaseChangeLog>
 

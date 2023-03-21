@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using Capture.Service.Database;
 using Capture.Service.Handler.provider;
 using Capture.Service.Listener;
+using Capture.Service.Models;
 using Capture.Service.Parser;
 using Capture.Service.TaskQueue;
 using Microsoft.Extensions.Logging;
@@ -24,7 +26,7 @@ public class Handler : IHandler
         _logger = logger;
         _repository = repository;
         _parseQueue = new TaskQueue<ReceivedData>(Parse, ParsingErrorHandler);
-        _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: 1000, exceptionHandler: SavingErrorHandler);
+        _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: 500, exceptionHandler: SavingErrorHandler);
         _provider = provider;
     }
 
@@ -55,9 +57,11 @@ public class Handler : IHandler
         _parseQueue.EnqueueTask(data);
     }
 
-    private Data GetData(Message msg, IPEndPoint endPoint, DateTime Time)
+    private Data GetData(Message msg, IPEndPoint endPoint, DateTime time)
     {
         Dictionary<string, string> headers = new();
+
+        headers["CallId"] = msg.Sip.CallId;
         foreach (var h in msg.Sip.UnknownHeaders)
         {
             var (key, value) = ParseUnknownHeader(h);
@@ -67,12 +71,19 @@ public class Handler : IHandler
             }
         }
 
+        var details = new Details(
+            msg.Hep.sourceIPAddress,
+            msg.Hep.destinationIPAddress,
+            msg.Hep.timeSeconds,
+            msg.Hep.timeUseconds);
+
         return new Data(
             headers,
-            msg.Payload,
+            Encoding.Default.GetString(msg.Payload),
             msg.Sip.CallId,
             endPoint,
-            Time);
+            time,
+            details);
     }
 
     private static (string, string) ParseUnknownHeader(string str)

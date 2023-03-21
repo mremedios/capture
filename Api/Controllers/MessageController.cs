@@ -1,4 +1,7 @@
+using Api.Graph;
+using Api.Graph.Models;
 using Capture.Service.Database;
+using Capture.Service.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -17,8 +20,15 @@ public class MessageController : ControllerBase
     }
 
     [HttpGet()]
-    public IEnumerable<string> Get(string header)
+    public IEnumerable<ShortData> MessagesByHeader(string header)
     {
         return _repo.FindByHeader(header);
+    }
+
+    [HttpGet(), Route("graph")]
+    public Sequence GraphByHeader(string header)
+    {
+        var messages = _repo.FindByHeader(header);
+        return new GraphBuilder(messages).Build();
     }
 }

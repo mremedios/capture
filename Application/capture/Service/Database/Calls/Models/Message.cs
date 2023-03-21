@@ -9,9 +9,9 @@ public class Message
     [Key, Column("message_id")] 
     public int MessageId { get; set; }
     
-    [Column("protocol_header")] 
-    public string Headers { get; set; }
-    
+    [Column("details")]
+    public string Details { get; set; }
+
     [Column("message")] 
     public string Text { get; set; }
     

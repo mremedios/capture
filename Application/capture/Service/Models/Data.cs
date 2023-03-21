@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 
-namespace Capture.Service.Handler;
+namespace Capture.Service.Models;
 
 public record Data
 (
     Dictionary<string, string> Headers,
-    byte[] SipMessage,
+    string SipMessage,
     string CallId,
     IPEndPoint Host,
-    DateTime Time
+    DateTime ReceivingTime, 
+    Details Details
 );

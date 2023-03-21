@@ -1,5 +1,5 @@
 --liquibase formatted sql
---changeset calls
+--changeset calls:4
 CREATE TABLE calls
 (
     local_call_id BIGSERIAL                                          NOT NULL,

@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Transactions;
 using Capture.Service.Database.Calls.Models;
-using Capture.Service.Handler;
+using Capture.Service.Models;
 
 namespace Capture.Service.Database.Calls;
 
@@ -26,21 +25,38 @@ public class CallsRepository : IHeaderRepository
 
     public async Task InsertRangeAsync(IList<Data> rawMessages)
     {
-        using (var ctx1 = CreateContext())
+        using (var ctx = CreateContext())
         {
-            var calls = rawMessages.Select(x => (x, InsertAndGetCall(ctx1, x).LocalCallId)).ToList();
+            var calls = rawMessages.Select(x => (x, InsertAndGetCall(ctx, x).LocalCallId)).ToList();
 
-            await PutMessages(ctx1, calls);
-            await PutHeaders(ctx1, calls);
+            await PutMessages(ctx, calls);
+            await PutHeaders(ctx, calls);
 
-            await ctx1.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
         }
     }
-    
-    public string[] FindAvailableHeaders()
+
+    public ShortData[] FindByHeader(string header)
     {
-        using var ctx = _contextFactory.CreateContext();
-        return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
+        using var ctx = CreateContext();
+        var messages =
+            ctx
+                .Headers.Where(h => h.Value == header)
+                .Join(
+                    ctx.Messages,
+                    h => h.LocalCallId,
+                    m => m.LocalCallId,
+                    (h, m) => m
+                );
+
+        var shortMsg = messages.ToList().Select(m =>
+            new ShortData(
+                m.Text,
+                JsonSerializer.Deserialize<Details>(m.Details)
+            )
+        );
+
+        return shortMsg.ToArray();
     }
 
     private Call InsertAndGetCall(CallsContext ctx, Data data)
@@ -57,7 +73,7 @@ public class CallsRepository : IHeaderRepository
             return callWithId;
         }
 
-        var call = new Call { Date = data.Time, Host = data.Host.ToString(), CallId = data.CallId };
+        var call = new Call { Date = data.ReceivingTime, Host = data.Host.ToString(), CallId = data.CallId };
         ctx.Calls.Add(call);
 
         ctx.SaveChanges();
@@ -82,16 +98,16 @@ public class CallsRepository : IHeaderRepository
             var (data, localCallId) = x;
             return new Message
             {
-                Headers = JsonSerializer.Serialize(data.Headers),
-                Text = Encoding.Default.GetString(data.SipMessage),
-                LocalCallId = localCallId
+                Text = data.SipMessage,
+                LocalCallId = localCallId,
+                Details = JsonSerializer.Serialize(data.Details)
             };
         });
 
         await ctx.AddRangeAsync(messages);
     }
 
-    private async Task PutHeaders(CallsContext ctx,  IList<(Data, int)> calls)
+    private async Task PutHeaders(CallsContext ctx, IList<(Data, int)> calls)
     {
         var headers = calls.SelectMany(x =>
             {
@@ -104,8 +120,8 @@ public class CallsRepository : IHeaderRepository
                         LocalCallId = localCallId
                     });
             }
-        ).ToArray();
+        ).Distinct().ToArray();
 
-        await StoredProcedure.CallProcedure(ctx, "insert_headers", headers);
+        await ctx.StoredProcedure("insert_headers", headers);
     }
 }

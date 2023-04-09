@@ -5,15 +5,7 @@ namespace Test;
 
 public class QueriesTest
 {
-
-    [Test]
-    public void CustomIdSelect()
-    {
-        var repo = new JsonRepository();
-        var res = repo.FindByHeader("callsessionid", "49ee2f4ad78249e39bab227b02fcd38b");
-        Console.WriteLine(res);
-    }
-
+    
     [Test]
     public void kkk()
     {

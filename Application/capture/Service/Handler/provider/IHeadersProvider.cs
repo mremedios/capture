@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Capture.Service.Database;
+namespace Capture.Service.Handler.provider;
 
 public interface IHeadersProvider
 {

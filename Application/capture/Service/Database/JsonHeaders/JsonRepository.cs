@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Capture.Service.Database.JsonHeaders.Entities;
 using Capture.Service.Handler;
+using Capture.Service.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Capture.Service.Database.JsonHeaders;
@@ -26,32 +27,29 @@ public class JsonRepository : IHeaderRepository
             }
         }
     }
+    
 
-    public string[] FindAvailableHeaders()
+    public ShortData[] FindByHeader(string value)
     {
         throw new NotImplementedException();
-    }
-
-    public string[] FindByHeader(string key, string value)
-    {
-        using (var ctx = new JsonContext())
-        {
-            var search = $"\"{key}\": \"{value}\"";
-            var res = ctx.Headers
-                .Where(h => EF.Functions.JsonContains(h.protocol_header, search))
-                .ToList();
-            return res.Select(h => h.raw).ToArray();
-        }
+        // using (var ctx = new JsonContext())
+        // {
+        //     var search = $"\"callid\": \"{value}\"";
+        //     var res = ctx.Headers
+        //         .Where(h => EF.Functions.JsonContains(h.protocol_header, search))
+        //         .ToList();
+        //     return res.Select(h => h.raw).ToArray();
+        // }
     }
 
     private static Header GetHeader(Data data)
     {
         return new Header
         {
-            created_date = data.Time,
+            created_date = data.ReceivingTime,
             call_id = data.CallId,
             endpoint = data.Host.ToString(),
-            raw = Encoding.Default.GetString(data.SipMessage),
+            raw = data.SipMessage,
             protocol_header = data.Headers
         };
     }

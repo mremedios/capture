@@ -3,6 +3,7 @@ using Capture.Service;
 using Capture.Service.Database;
 using Capture.Service.Database.Calls;
 using Capture.Service.Handler;
+using Capture.Service.Handler.provider;
 using Capture.Service.Listener;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddSingleton<ICapture, UdpCapture>()
             .AddHostedService<HostedService>()
             .AddSingleton<IHeaderRepository, CallsRepository>()
+            .AddSingleton<IAvailableHeaderRepository, AvailableHeaderRepository>()
             .AddSingleton<IHandler, Handler>()
             .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
             .AddSingleton<IHeadersProvider, HeadersProvider>();

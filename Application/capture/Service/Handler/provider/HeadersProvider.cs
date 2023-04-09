@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Capture.Service.Database;
 
-namespace Capture.Service.Database.Calls;
+namespace Capture.Service.Handler.provider;
 
 public class HeadersProvider: IHeadersProvider
 {
     private ISet<string> _availableHeaders = new HashSet<string>();
-    private readonly IHeaderRepository _repo;
+    private readonly IAvailableHeaderRepository _repo;
     private Timer _timer;
     
-    public HeadersProvider(IHeaderRepository repository)
+    public HeadersProvider(IAvailableHeaderRepository repository)
     {
         _repo = repository;
     }
@@ -21,9 +21,9 @@ public class HeadersProvider: IHeadersProvider
     {
         _timer = new Timer((e) =>
         {
-            var nv = new HashSet<string>(_repo.FindAvailableHeaders());
+            var nv = new HashSet<string>(_repo.FindAll());
             Interlocked.Exchange(ref _availableHeaders, nv);
-        }, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));  
+        }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));  
         
         return Task.CompletedTask;
     }

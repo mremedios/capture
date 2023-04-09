@@ -46,7 +46,8 @@ public class FileSender
 
     public static void Start()
     {
-        using Stream input = File.OpenRead("input/HEP_sample_20221202_095623.bin");
+        // using Stream input = File.OpenRead("input/HEP_sample_20221202_095623.bin");
+        using Stream input = File.OpenRead("input/HEP_sample_20221202_103917.bin");
         // using Stream input = File.OpenRead("input/somepack.bin");
         GetPackages(input, new UdpSender());
     }

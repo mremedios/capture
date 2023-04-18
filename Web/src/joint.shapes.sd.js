@@ -1,7 +1,7 @@
 (function (joint) {
 
-    var standard = joint.shapes.standard;
-    var dia = joint.dia;
+    let standard = joint.shapes.standard;
+    let dia = joint.dia;
 
     standard.Rectangle.define('sd.RoleGroup', {
         z: 1,
@@ -44,7 +44,7 @@
                 ry: 2
             },
             label: {
-                fontSize: 18,
+                fontSize: 12,
                 fontFamily: 'sans-serif',
                 textWrap: {
                     width: -10
@@ -137,8 +137,6 @@
     });
 
     standard.Link.define('sd.Message', {
-        z: 5,
-        myField: "xxx",
         source: {anchor: {name: 'connectionLength'}},
         target: {anchor: {name: 'connectionPerpendicular'}},
         attrs: {
@@ -153,11 +151,9 @@
             wrapper: {
                 strokeWidth: 20,
                 cursor: 'grab'
-            },
+            }
         }
     }, {
-        placeholder: 'What\'s the message?',
-
         defaultLabel: {
             markup: [{
                 tagName: 'rect',
@@ -165,7 +161,11 @@
             }, {
                 tagName: 'text',
                 selector: 'labelText'
-            }],
+            }, {
+                tagName: 'text',
+                selector: 'buttonLabel'
+            }
+            ],
             attrs: {
                 labelBody: {
                     ref: 'labelText',
@@ -183,7 +183,16 @@
                     fontFamily: 'sans-serif',
                     textAnchor: 'middle',
                     textVerticalAnchor: 'middle',
-                    cursor: 'grab'
+                    cursor: 'pointer'
+                },
+                buttonLabel: {
+                    pointerEvents: 'none',
+                    x: 'calc(x)',
+                    y: 19,
+                    textAnchor: 'middle',
+                    textVerticalAnchor: 'middle',
+                    fill: 'gray',
+                    fontSize: 10,
                 }
             }
         },
@@ -196,13 +205,21 @@
                 target: {id: to.id}
             });
         },
-        setDescription: function (description) {
-            this.labels([{attrs: {labelText: {text: description}}}]);
+        setDescription: function (description, time) {
+            this.labels([{
+                attrs:
+                    {
+                        labelText:
+                            {text: description},
+                        buttonLabel:
+                            {text: time}
+                    }
+            },
+            ]);
         }
     });
 
     dia.Element.define('sd.Details', {
-        size: {width: 300, height: 80},
         attrs: {
             body: {
                 width: 'calc(w)',
@@ -214,11 +231,10 @@
             label: {
                 textVerticalAnchor: 'middle',
                 textAnchor: 'left',
-                x: 'calc(0.01 * w)',
+                x: 'calc(0.01 * w) ',
                 y: 'calc(0.5*h)',
                 fontSize: 14,
-                fill: 'black',
-                
+                fill: 'black'
             },
             button: {
                 cursor: 'pointer',
@@ -228,7 +244,7 @@
                 x: 'calc(x-calc(0.25*w))',
                 y: 'calc(y-calc(0.25*h))',
                 event: 'details:button:pointerdown',
-                fill: 'orange',
+                fill: '#FFF123',
                 stroke: 'black',
                 strokeWidth: 2
             },
@@ -257,14 +273,10 @@
         }, {
             tagName: 'text',
             selector: 'buttonLabel'
-        }],
+        }
+        ],
         setText: function (text) {
             this.attr(['label', 'text'], text);
-        },
-        resize: function (w, h) {
-            this.set({
-                size: {width: w, height: h},
-            });
         }
     });
 

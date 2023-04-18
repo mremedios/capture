@@ -71,6 +71,7 @@ namespace Capture.Service.Parser
                             break;
                         case 4:
                             var dstIp4 = reader.ReadBytes(4);
+                            // TODO: положить в базу байты, а не строку
                             hepStruct.destinationIPAddress = IpToString(dstIp4);
                             break;
                         case 7:

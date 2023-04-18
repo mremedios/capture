@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Capture.Service.Database;
 using Capture.Service.Handler.provider;
@@ -13,23 +14,30 @@ using Microsoft.Extensions.Logging;
 
 namespace Capture.Service.Handler;
 
-public class Handler : IHandler
+public class Handler : IHandler, IDisposable
 {
     private readonly ILogger<Handler> _logger;
     private readonly IHeaderRepository _repository;
     private readonly TaskQueue<ReceivedData> _parseQueue;
     private readonly BufferedTaskQueue<Data> _dbQueue;
     private readonly IHeadersProvider _provider;
-
+    private Timer _timer;
+    
     public Handler(ILogger<Handler> logger, IHeaderRepository repository, IHeadersProvider provider)
     {
         _logger = logger;
         _repository = repository;
         _parseQueue = new TaskQueue<ReceivedData>(Parse, ParsingErrorHandler);
-        _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: 500, exceptionHandler: SavingErrorHandler);
+        _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: 1000, exceptionHandler: SavingErrorHandler);
         _provider = provider;
+        _timer = new Timer((e) =>
+        {
+            _logger.LogDebug("Parser queue size {0}", _parseQueue.TaskCount);
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
     }
+    
 
+    
     private void Parse(ReceivedData data)
     {
         var message = ParserHePv3.ParseMessage(data.Msg);
@@ -60,8 +68,7 @@ public class Handler : IHandler
     private Data GetData(Message msg, IPEndPoint endPoint, DateTime time)
     {
         Dictionary<string, string> headers = new();
-
-        headers["CallId"] = msg.Sip.CallId;
+        
         foreach (var h in msg.Sip.UnknownHeaders)
         {
             var (key, value) = ParseUnknownHeader(h);
@@ -89,10 +96,12 @@ public class Handler : IHandler
     private static (string, string) ParseUnknownHeader(string str)
     {
         var x = str.Split(':');
-        x[0] = x[0]
-            .Replace("I-", "")
-            .Replace("X-", "")
-            .Replace("T-", "");
-        return (x[0].ToLower().Trim(), x[1].Trim());
+        return (x[0].Trim(), x[1].Trim());
+    }
+
+    public void Dispose()
+    {
+        _parseQueue?.Dispose();
+        _dbQueue?.Dispose();
     }
 }

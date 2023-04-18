@@ -35,7 +35,7 @@ public class PostgreSqlContextFactory : IContextFactory
             
             builder.UseNpgsql(dataSource)
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-                .LogTo(Console.WriteLine, LogLevel.Error);
+                .LogTo(Console.WriteLine, LogLevel.Debug);
 
             return new CallsContext(builder.Options);
         }

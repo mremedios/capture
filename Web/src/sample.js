@@ -1,6 +1,6 @@
 let str = `  
 {
-  "roles": [
+  "endpoints": [
     "Point A",
     "Point B",
     "Point C"

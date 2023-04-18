@@ -57,7 +57,7 @@ namespace Capture.Service.Listener
                 while (!_cts.Token.IsCancellationRequested)
                 {
                     var x = await _listener.ReceiveAsync(_cts.Token);
-                    _logger.LogInformation("Handle message from {}" ,x.RemoteEndPoint);
+                    _logger.LogDebug("Handle message from {}" ,x.RemoteEndPoint);
                     
                     _handler.HandleMessage(new ReceivedData(x.Buffer, x.RemoteEndPoint, DateTime.Now));
                 }

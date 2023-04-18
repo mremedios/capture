@@ -6,16 +6,23 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Capture.Service.Database.Calls.Models;
 using Capture.Service.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Capture.Service.Database.Calls;
 
-public class CallsRepository : IHeaderRepository
+public class CallsRepository : IHeaderRepository, IDisposable
 {
     private readonly IContextFactory _contextFactory;
+    private readonly IMemoryCache _cache;
 
     public CallsRepository(IContextFactory contextFactory)
     {
         _contextFactory = contextFactory;
+        _cache = new MemoryCache(
+            new MemoryCacheOptions
+            {
+                SizeLimit = 1024
+            });
     }
 
     private CallsContext CreateContext()
@@ -27,12 +34,13 @@ public class CallsRepository : IHeaderRepository
     {
         using (var ctx = CreateContext())
         {
-            var calls = rawMessages.Select(x => (x, InsertAndGetCall(ctx, x).LocalCallId)).ToList();
+            var calls = rawMessages.Select(x => (x, GetCallCaching(ctx, x).LocalCallId)).ToList();
 
-            await PutMessages(ctx, calls);
+            var t1 = PutMessages(ctx, calls);
             await PutHeaders(ctx, calls);
+            await t1;
 
-            await ctx.SaveChangesAsync();
+            ctx.SaveChanges();
         }
     }
 
@@ -57,6 +65,18 @@ public class CallsRepository : IHeaderRepository
         );
 
         return shortMsg.ToArray();
+    }
+
+    private Call GetCallCaching(CallsContext ctx, Data data)
+    {
+        return _cache.GetOrCreate(data.CallId + data.Host,
+            (r =>
+            {
+                r.Size = 1;
+                r.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(2);
+                return InsertAndGetCall(ctx, data);
+            })
+        );
     }
 
     private Call InsertAndGetCall(CallsContext ctx, Data data)
@@ -123,5 +143,10 @@ public class CallsRepository : IHeaderRepository
         ).Distinct().ToArray();
 
         await ctx.StoredProcedure("insert_headers", headers);
+    }
+
+    public void Dispose()
+    {
+        _cache?.Dispose();
     }
 }

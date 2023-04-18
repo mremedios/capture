@@ -19,6 +19,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{E0F854FA-F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{E7DA2915-6FE1-48F5-B948-19AD8E5DA22A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{42C20E64-66B9-4286-B4C5-F7DD3CA8E4B1}"
+	ProjectSection(SolutionItems) = preProject
+		Web\index.html = Web\index.html
+		Web\.DS_Store = Web\.DS_Store
+		Web\sample\data.json = Web\sample\data.json
+		Web\src\sequence.js = Web\src\sequence.js
+		Web\src\fetch.js = Web\src\fetch.js
+		Web\src\joint.shapes.sd.js = Web\src\joint.shapes.sd.js
+		Web\src\sample.js = Web\src\sample.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -1,7 +1,6 @@
-using System.Globalization;
+/*using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.RegularExpressions;
 using WebSocketSharp;
 
@@ -44,7 +43,8 @@ public class FileSender
         }
     }
 
-    public static void Start()
+    [Test]
+    public void Start()
     {
         // using Stream input = File.OpenRead("input/HEP_sample_20221202_095623.bin");
         using Stream input = File.OpenRead("input/HEP_sample_20221202_103917.bin");
@@ -79,4 +79,4 @@ internal class UdpSender : ISender
             Console.WriteLine(e);
         }
     }
-}
+}*/

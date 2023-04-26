@@ -20,7 +20,7 @@ public class PostgreSqlContextFactory : IContextFactory
     public CallsContext CreateContext()
     {
         var connectionString =
-            $"Host={_config.Address};Database={_config.Database};Maximum Pool Size={_config.MaxConnections}";
+            $"Host={_config.Address};Database={_config.Database};Username={_config.Username};Password={_config.Password};Maximum Pool Size={_config.MaxConnections}";
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -29,8 +29,8 @@ public class PostgreSqlContextFactory : IContextFactory
             var builder = new DbContextOptionsBuilder<CallsContext>();
 
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-            dataSourceBuilder.MapComposite<Header>("header_type");
-                
+            dataSourceBuilder.MapComposite<CallHeader>("header_type");
+
             var dataSource = dataSourceBuilder.Build();
             
             builder.UseNpgsql(dataSource)
@@ -39,9 +39,7 @@ public class PostgreSqlContextFactory : IContextFactory
 
             return new CallsContext(builder.Options);
         }
-        else
-        {
-            throw new NotImplementedException();
-        }
+
+        throw new NotImplementedException();
     }
 }

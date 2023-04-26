@@ -10,7 +10,7 @@ public class Call
     [DatabaseGenerated(DatabaseGeneratedOption.Identity), Key, Column("local_call_id")]
     public int LocalCallId { get; set; }
 
-    [Column("created")] 
+    [Column("at")] 
     public DateTime Date { get; set; }
     
     [Column("host")] 

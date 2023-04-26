@@ -9,7 +9,7 @@ namespace Capture.Service.Database.Calls;
 
 public static class ContextExtension
 {
-    public static async Task StoredProcedure(this CallsContext ctx, string procedureName, Header[] data)
+    public static async Task StoredProcedure<T>(this CallsContext ctx, string procedureName, T data)
     {
         var connection = (NpgsqlConnection)ctx.Database.GetDbConnection();
         

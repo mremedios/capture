@@ -1,16 +1,30 @@
-using Capture.Service.Database.JsonHeaders;
-using Newtonsoft.Json;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
 
-namespace Test;
-
-public class QueriesTest
+namespace Test
 {
     
-    [Test]
-    public void kkk()
+    public class TheEasiestBenchmark
     {
-        var a = "{\"callid\": \"5287826707\",\"callsessionid\": \"49ee2f4ad78249e39bab227b02fcd38b\"}";
-        var y = JsonConvert.DeserializeObject<Dictionary<string, string>>(a);
-        
+        [Benchmark(Description = "Summ100")]
+        public int Test100()
+        {
+            return Enumerable.Range(1, 100).Sum();
+        }
+
+        [Benchmark(Description = "Summ200")]
+        public int Test200()
+        {
+            return Enumerable.Range(1, 200).Sum();
+        }
+    }
+    
+    
+    public class Program
+    {
+        public static void Main()
+        {            
+            BenchmarkRunner.Run<TheEasiestBenchmark>();
+        }
     }
 }

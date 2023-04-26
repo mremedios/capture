@@ -29,8 +29,9 @@ builder.Configuration
 
 builder.Services
     .AddSingleton<IAvailableHeaderRepository, AvailableHeaderRepository>()
-    .AddSingleton<IHeaderRepository, CallsRepository>()
-    .AddSingleton<IContextFactory, PostgreSqlContextFactory>();
+    .AddSingleton<ICallsRepository, CallsRepository>()
+    .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
+    .AddSingleton<IPartmanRepository, PartmanRepository>();
 
 var app = builder.Build();
 

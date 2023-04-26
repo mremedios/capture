@@ -21,7 +21,7 @@ var builder = Host.CreateDefaultBuilder(args)
     {
         services.AddSingleton<ICapture, UdpCapture>()
             .AddHostedService<HostedService>()
-            .AddSingleton<IHeaderRepository, CallsRepository>()
+            .AddSingleton<ICallsRepository, CallsRepository>()
             .AddSingleton<IAvailableHeaderRepository, AvailableHeaderRepository>()
             .AddSingleton<IHandler, Handler>()
             .AddSingleton<IContextFactory, PostgreSqlContextFactory>()

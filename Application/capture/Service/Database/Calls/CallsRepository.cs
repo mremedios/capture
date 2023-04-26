@@ -10,7 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Capture.Service.Database.Calls;
 
-public class CallsRepository : IHeaderRepository, IDisposable
+public class CallsRepository : ICallsRepository, IDisposable
 {
     private readonly IContextFactory _contextFactory;
     private readonly IMemoryCache _cache;
@@ -34,7 +34,7 @@ public class CallsRepository : IHeaderRepository, IDisposable
     {
         using (var ctx = CreateContext())
         {
-            var calls = rawMessages.Select(x => (x, GetCallCaching(ctx, x).LocalCallId)).ToList();
+            var calls = rawMessages.Select(x => (x, GetCallCaching(ctx, x))).ToList();
 
             var t1 = PutMessages(ctx, calls);
             await PutHeaders(ctx, calls);
@@ -56,6 +56,37 @@ public class CallsRepository : IHeaderRepository, IDisposable
                     m => m.LocalCallId,
                     (h, m) => m
                 );
+
+        var shortMsg = messages.ToList().Select(m =>
+            new ShortData(
+                m.Text,
+                JsonSerializer.Deserialize<Details>(m.Details)
+            )
+        );
+
+        return shortMsg.ToArray();
+    }
+
+    public ShortData[] FindByHeaderAndDate(string header, DateOnly date)
+    {
+        using var ctx = CreateContext();
+        var messages =
+            ctx.Headers
+                .Where(h => h.Value == header && h.At == date)
+                .SelectMany(h =>
+                        ctx.Messages
+                            .Where(m => h.LocalCallId == m.LocalCallId && h.At == m.Date)
+                            .DefaultIfEmpty(),
+                    (h, m) => m);
+
+
+        // .Headers.Where(h => h.Value == header && h.At == date)
+        // .Join(
+        //     ctx.Messages,
+        //     h => h.LocalCallId,
+        //     m => m.LocalCallId,
+        //     (h, m) => m
+        // );
 
         var shortMsg = messages.ToList().Select(m =>
             new ShortData(
@@ -111,15 +142,16 @@ public class CallsRepository : IHeaderRepository, IDisposable
         );
     }
 
-    private async Task PutMessages(CallsContext ctx, IList<(Data, int)> calls)
+    private async Task PutMessages(CallsContext ctx, IList<(Data, Call)> calls)
     {
         var messages = calls.Select(x =>
         {
-            var (data, localCallId) = x;
+            var (data, call) = x;
             return new Message
             {
                 Text = data.SipMessage,
-                LocalCallId = localCallId,
+                Date = DateOnly.FromDateTime(call.Date),
+                LocalCallId = call.LocalCallId,
                 Details = JsonSerializer.Serialize(data.Details)
             };
         });
@@ -127,22 +159,23 @@ public class CallsRepository : IHeaderRepository, IDisposable
         await ctx.AddRangeAsync(messages);
     }
 
-    private async Task PutHeaders(CallsContext ctx, IList<(Data, int)> calls)
+    private async Task PutHeaders(CallsContext ctx, IList<(Data, Call)> calls)
     {
         var headers = calls.SelectMany(x =>
             {
-                var (data, localCallId) = x;
+                var (data, call) = x;
                 return data.Headers.Select(h =>
-                    new Header
+                    new CallHeader
                     {
-                        header = h.Key,
+                        Header = h.Key,
                         Value = h.Value,
-                        LocalCallId = localCallId
+                        LocalCallId = call.LocalCallId,
+                        At = DateOnly.FromDateTime(call.Date)
                     });
             }
         ).Distinct().ToArray();
 
-        await ctx.StoredProcedure("insert_headers", headers);
+        await ctx.StoredProcedure("partman.insert_headers", headers);
     }
 
     public void Dispose()

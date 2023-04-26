@@ -26,3 +26,11 @@ SELECT m.message_id, m.details, m.local_call_id, m.message
 FROM headers AS h
          INNER JOIN messages AS m ON h.local_call_id = m.local_call_id
 WHERE h.value = @__header_0
+
+
+// хоть запрос работает :) 
+SELECT m.details, m.local_call_id, m.at, m.message
+FROM capt.headers AS h
+         LEFT JOIN capt.messages AS m ON h.local_call_id = m.local_call_id AND h.at = m.at
+WHERE h.value = @__header_0 AND h.at = @__date_1
+

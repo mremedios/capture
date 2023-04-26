@@ -17,13 +17,13 @@ namespace Capture.Service.Handler;
 public class Handler : IHandler, IDisposable
 {
     private readonly ILogger<Handler> _logger;
-    private readonly IHeaderRepository _repository;
+    private readonly ICallsRepository _repository;
     private readonly TaskQueue<ReceivedData> _parseQueue;
     private readonly BufferedTaskQueue<Data> _dbQueue;
     private readonly IHeadersProvider _provider;
-    private Timer _timer;
+    private readonly Timer _timer;
     
-    public Handler(ILogger<Handler> logger, IHeaderRepository repository, IHeadersProvider provider)
+    public Handler(ILogger<Handler> logger, ICallsRepository repository, IHeadersProvider provider)
     {
         _logger = logger;
         _repository = repository;
@@ -35,9 +35,7 @@ public class Handler : IHandler, IDisposable
             _logger.LogDebug("Parser queue size {0}", _parseQueue.TaskCount);
         }, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
     }
-    
 
-    
     private void Parse(ReceivedData data)
     {
         var message = ParserHePv3.ParseMessage(data.Msg);
@@ -101,6 +99,8 @@ public class Handler : IHandler, IDisposable
 
     public void Dispose()
     {
+        _timer.Change(Timeout.Infinite, 0);
+        _timer.Dispose();
         _parseQueue?.Dispose();
         _dbQueue?.Dispose();
     }

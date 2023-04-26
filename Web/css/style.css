@@ -1,4 +1,10 @@
-#search-header {
+.search {
+    width: 25rem;
+    height: 2rem;
+    margin-bottom: 1rem;
+}
+
+#search-box {
     width: 25rem;
     margin: 3rem 0 0 3rem;
 }
@@ -6,7 +12,6 @@
 #search-time {
     width: 10rem;
     height: auto;
-    margin-left: 3rem;
     font-size: small;
     color: gray;
 }

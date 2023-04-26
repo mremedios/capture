@@ -11,9 +11,9 @@ namespace Api.Controllers;
 public class MessageController : ControllerBase
 {
     private readonly ILogger<HeadersController> _logger;
-    private readonly IHeaderRepository _repo;
+    private readonly ICallsRepository _repo;
 
-    public MessageController(ILogger<HeadersController> logger, IHeaderRepository repository)
+    public MessageController(ILogger<HeadersController> logger, ICallsRepository repository)
     {
         _logger = logger;
         _repo = repository;
@@ -25,10 +25,27 @@ public class MessageController : ControllerBase
         return _repo.FindByHeader(header);
     }
 
+    // [HttpGet(), Route("graph")]
+    // public Sequence GraphByInterval(string header, string value, string from, string to)
+    // {
+    //     var messages = _repo.FindByHeader(value);
+    //     return new GraphBuilder(messages).Build();
+    // }
+    
     [HttpGet(), Route("graph")]
-    public Sequence GraphByHeader(string header)
+    public Sequence GraphByDate(string header, string value, string? date)
     {
-        var messages = _repo.FindByHeader(header);
+        ShortData[] messages;
+        if (date == null || DateOnly.TryParse(date, out var dateOnly) == false)
+        {
+            messages = _repo.FindByHeader(value);
+        }
+        else
+        {
+            
+            messages = _repo.FindByHeaderAndDate(value, dateOnly);
+        }
+        
         return new GraphBuilder(messages).Build();
     }
 }

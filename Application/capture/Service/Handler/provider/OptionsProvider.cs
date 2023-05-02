@@ -6,13 +6,13 @@ using Capture.Service.Database;
 
 namespace Capture.Service.Handler.provider;
 
-public class HeadersProvider: IHeadersProvider
+public class OptionsProvider : IOptionsProvider
 {
     private ISet<string> _availableHeaders = new HashSet<string>();
     private readonly IAvailableHeaderRepository _repo;
     private Timer _timer;
-    
-    public HeadersProvider(IAvailableHeaderRepository repository)
+
+    public OptionsProvider(IAvailableHeaderRepository repository)
     {
         _repo = repository;
     }
@@ -23,8 +23,8 @@ public class HeadersProvider: IHeadersProvider
         {
             var nv = new HashSet<string>(_repo.FindAll());
             Interlocked.Exchange(ref _availableHeaders, nv);
-        }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));  
-        
+        }, null, TimeSpan.Zero, TimeSpan.FromMinutes(1));
+
         return Task.CompletedTask;
     }
 
@@ -33,6 +33,11 @@ public class HeadersProvider: IHeadersProvider
         _timer.Change(Timeout.Infinite, 0);
         _timer.Dispose();
         return Task.CompletedTask;
+    }
+
+    public ISet<string> GetExcludedMethods()
+    {
+        return new HashSet<string> { "OPTIONS", "REGISTER" };
     }
 
     public ISet<string> GetAvailableHeaders()

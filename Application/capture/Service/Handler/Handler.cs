@@ -20,27 +20,28 @@ public class Handler : IHandler, IDisposable
     private readonly ICallsRepository _repository;
     private readonly TaskQueue<ReceivedData> _parseQueue;
     private readonly BufferedTaskQueue<Data> _dbQueue;
-    private readonly IHeadersProvider _provider;
+    private readonly IOptionsProvider _provider;
     private readonly Timer _timer;
-    
-    public Handler(ILogger<Handler> logger, ICallsRepository repository, IHeadersProvider provider)
+
+    public Handler(ILogger<Handler> logger, ICallsRepository repository, IOptionsProvider provider)
     {
         _logger = logger;
         _repository = repository;
         _parseQueue = new TaskQueue<ReceivedData>(Parse, ParsingErrorHandler);
         _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: 1000, exceptionHandler: SavingErrorHandler);
         _provider = provider;
-        _timer = new Timer((e) =>
-        {
-            _logger.LogDebug("Parser queue size {0}", _parseQueue.TaskCount);
-        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+        _timer = new Timer((e) => { _logger.LogDebug("Parser queue size {0}", _parseQueue.TaskCount); }, null,
+            TimeSpan.Zero, TimeSpan.FromSeconds(5));
     }
 
     private void Parse(ReceivedData data)
     {
         var message = ParserHePv3.ParseMessage(data.Msg);
-        var d = GetData(message, data.EndPoint, data.Time);
-        _dbQueue.EnqueueTask(d);
+        if (!_provider.GetExcludedMethods().Contains(message.Sip.CSeqMethod.ToString()))
+        {
+            var d = GetData(message, data.EndPoint, data.Time);
+            _dbQueue.EnqueueTask(d);
+        }
     }
 
     private void ParsingErrorHandler(Exception e, ReceivedData y)
@@ -66,7 +67,7 @@ public class Handler : IHandler, IDisposable
     private Data GetData(Message msg, IPEndPoint endPoint, DateTime time)
     {
         Dictionary<string, string> headers = new();
-        
+
         foreach (var h in msg.Sip.UnknownHeaders)
         {
             var (key, value) = ParseUnknownHeader(h);

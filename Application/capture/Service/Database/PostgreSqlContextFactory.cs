@@ -24,22 +24,18 @@ public class PostgreSqlContextFactory : IContextFactory
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-        if (_config.Database == "capture")
-        {
-            var builder = new DbContextOptionsBuilder<CallsContext>();
+        var builder = new DbContextOptionsBuilder<CallsContext>();
 
-            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-            dataSourceBuilder.MapComposite<CallHeader>("header_type");
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+        dataSourceBuilder.MapComposite<CallHeader>("header_type");
 
-            var dataSource = dataSourceBuilder.Build();
-            
-            builder.UseNpgsql(dataSource)
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-                .LogTo(Console.WriteLine, LogLevel.Debug);
+        var dataSource = dataSourceBuilder.Build();
 
-            return new CallsContext(builder.Options);
-        }
+        builder.UseNpgsql(dataSource)
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+            .LogTo(Console.WriteLine, LogLevel.Error);
 
-        throw new NotImplementedException();
+        return new CallsContext(builder.Options);
     }
 }
+

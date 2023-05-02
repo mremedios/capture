@@ -49,8 +49,8 @@ namespace Capture.Service.Listener
 
         private async Task CaptureAsync()
         {
-            var fileName = $"HEP_sample_{DateTime.Now:yyyyMMdd_hhmmss}.bin";
-            var fileOutputStream = File.OpenWrite(fileName);
+            // var fileName = $"HEP_sample_{DateTime.Now:yyyyMMdd_hhmmss}.bin";
+            // var fileOutputStream = File.OpenWrite(fileName);
 
             try
             {
@@ -65,10 +65,6 @@ namespace Capture.Service.Listener
             catch (Exception e)
             {
                 _logger.LogWarning(e.Message);
-            }
-            finally
-            {
-                await fileOutputStream.DisposeAsync();
             }
         }
     }

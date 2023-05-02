@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 
 namespace Capture.Service.Handler.provider;
 
-public interface IHeadersProvider
+public interface IOptionsProvider
 {
     public ISet<string> GetAvailableHeaders();
+    
+    public ISet<string> GetExcludedMethods();
 
     public Task StartAsync(CancellationToken ct);
     

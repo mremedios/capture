@@ -15,10 +15,10 @@ namespace Capture.Service;
 public class HostedService : IHostedService
 {
     private readonly ICapture[] _captures;
-    private readonly IHeadersProvider _provider;
+    private readonly IOptionsProvider _provider;
     private CancellationTokenSource _cts;
 
-    public HostedService(IEnumerable<ICapture> captures, IHeadersProvider provider)
+    public HostedService(IEnumerable<ICapture> captures, IOptionsProvider provider)
     {
         _captures = captures.ToArray();
         _provider = provider;

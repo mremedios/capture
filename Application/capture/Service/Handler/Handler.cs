@@ -5,12 +5,12 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Capture.Service.Database;
 using Capture.Service.Handler.provider;
 using Capture.Service.Listener;
-using Capture.Service.Models;
 using Capture.Service.Parser;
 using Capture.Service.TaskQueue;
+using Database.Database;
+using Database.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Capture.Service.Handler;

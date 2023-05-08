@@ -1,14 +1,9 @@
-using Capture.Service.Listener;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Capture.Service.Database;
-using Capture.Service.Handler;
 using Capture.Service.Handler.provider;
+using Microsoft.Extensions.Hosting;
 
 namespace Capture.Service;
 

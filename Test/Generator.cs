@@ -46,11 +46,6 @@ public class Generator
 
     private string ByTemplate(string idstr)
     {
-        // var hepHeader =
-        //     "48-45-50-33-06-A7-00-00-00-01-00-07-02-00-00-00-02-00-07-11-00-00-00-03-00-0A-0A-E8-23-48-00-00-00-04-00-0A-0A-E8-23-49-00-00-00-07-00-08-13-C4-00-00-00-08-00-08-13-C4-00-00-00-09-00-0A-63-89-A2-94-00-00-00-0A-00-0A-00-0E-C4-08-00-00-00-0B-00-07-01-00-00-00-0C-00-0A-00-00-00-01-00-00-00-0F-06-4A-";
-        // var sip =
-        //         "INVITE sip:autotest1683155314t20_a_stub@10.232.35.73:5060 SIP/2.0\nVia: SIP/2.0/UDP 10.232.35.71:5060;TH=div;rport;branch=z9hG4bKPjb73c8639-a53c-472d-855c-703191adcf16\nFrom: \"78007557775\" <sip:72222222222@10.232.35.71>;tag=67dd0ab0-2920-4016-937c-c1c9173cc4ea\nTo: <sip:autotest1683155314t20_a_stub@10.232.35.73>\nContact: <sip:asterisk@10.232.35.71:5060>\nCall-ID: 908de092-e83e-4b23-80be-ea9f0d7d4680\nCSeq: 17075 INVITE\nAllow: OPTIONS, REGISTER, SUBSCRIBE, NOTIFY, PUBLISH, INVITE, ACK, BYE, CANCEL, UPDATE, PRACK, MESSAGE, REFER\nSupported: 100rel, timer, replaces, norefersub, histinfo\nSession-Expires: 600\nMin-SE: 90\nI-callDirection: outbound\nI-SegmentId: 6211680304\nI-ExternalTaskId: 073451a730ac4dca82e06b21ede85b20\nI-CallType: Pds\nI-calleeType: PhoneNumber\nI-phoneNumber: +72222222222\nI-primary_ani: 78007557775\nI-phoneType: pds\nI-ForbidRedial: False\nI-callerType: customer\nX-eduId: 6452e98f000000000ae8410e23360002\nX-ActionId: 74c8365854054ac68e7cf97b46e607c5\nI-primary_dnis: +72222222222\nI-CallId: 6211680304\nI-TCommunicationId: d976838267a54195ac213ac6f5b0f685\nI-TelephonyServiceHostName: ds-asterisk-qa-01t\nI-callerName: autotest1683155314t20\nI-queueCode: 022466\nI-dialingMode: Pds\nI-CallDirection: outbound\nX-CallToOperator: 1\nT-Communication-Id: d976838267a54195ac213ac6f5b0f685\nMax-Forwards: 70\nUser-Agent: ds-asterisk-qa-01t.ds.ast.local\nContent-Type: application/sdp\nContent-Length:   237\nTH: dih\n\nv=0\no=- 1562164403 1562164403 IN IP4 10.232.35.71\ns=Asterisk\nc=IN IP4 10.232.35.71\nt=0 0\nm=audio 16324 RTP/AVP 8 101\na=rtpmap:8 PCMA/8000\na=rtpmap:101 telephone-event/8000\na=fmtp:101 0-16\na=ptime:20\na=maxptime:150\na=sendrecv"
-        //     ;
         var id = BitConverter.ToString(Encoding.UTF8.GetBytes(idstr));
 
         return

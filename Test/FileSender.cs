@@ -47,11 +47,11 @@ public class FileSender
     public void Start()
     {
         // using Stream input = File.OpenRead("input/HEP_sample_20221202_095623.bin");
-        // using Stream input = File.OpenRead("input/HEP_sample_20221202_103917.bin");
+        using Stream input = File.OpenRead("input/HEP_sample_20221202_103917.bin");
         // using Stream input = File.OpenRead("input/somepack.bin");
-        using Stream input = File.OpenRead("input/in3.bin");
+        // using Stream input = File.OpenRead("input/in3.bin");
         GetPackages(input, new UdpSender());
-    }
+    }   
 }
 
 internal interface ISender
@@ -73,6 +73,7 @@ internal class UdpSender : ISender
     {
         try
         {
+            
             client.Send(arr);
         }
         catch (Exception e)

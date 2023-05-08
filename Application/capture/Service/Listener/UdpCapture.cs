@@ -21,6 +21,8 @@ namespace Capture.Service.Listener
         private UdpClient _homerClient;
         private Task _task;
 
+        private int _count = 0;
+        
         public UdpCapture(IConfiguration config, ILogger<UdpCapture> logger, IHandler handler)
         {
             _logger = logger;
@@ -58,7 +60,8 @@ namespace Capture.Service.Listener
                 {
                     var x = await _listener.ReceiveAsync(_cts.Token);
                     _logger.LogDebug("Handle message from {}" ,x.RemoteEndPoint);
-                    
+                    // Interlocked.Increment(ref _count);
+                    // if (_count % 100 == 0) _logger.LogCritical(_count.ToString());
                     _handler.HandleMessage(new ReceivedData(x.Buffer, x.RemoteEndPoint, DateTime.Now));
                 }
             }

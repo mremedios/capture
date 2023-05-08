@@ -16,7 +16,7 @@ CREATE TABLE calls
     call_id       VARCHAR(100)                                       NOT NULL,
     PRIMARY KEY (local_call_id, at)
 ) PARTITION BY RANGE (at);
-
+    
 --changeset messages:3
 CREATE TABLE messages
 (

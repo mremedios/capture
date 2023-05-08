@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Transactions;
-using Capture.Service.Database.Calls.Models;
-using Capture.Service.Models;
+using Database.Database.Calls.Models;
+using Database.Models;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Capture.Service.Database.Calls;
+namespace Database.Database.Calls;
 
 public class CallsRepository : ICallsRepository, IDisposable
 {
@@ -43,76 +39,8 @@ public class CallsRepository : ICallsRepository, IDisposable
             ctx.SaveChanges();
         }
     }
-    
-    
 
-    public ShortData[] FindByHeader(string header)
-    {
-        using var ctx = CreateContext();
-        var messages =
-            ctx.Headers
-                .Where(h => h.Value == header)
-                .SelectMany(h =>
-                        ctx.Messages
-                            .Where(m => h.LocalCallId == m.LocalCallId && h.At == m.Date)
-                            .DefaultIfEmpty(),
-                    (h, m) => m);
-
-        var shortMsg = messages.ToList().Select(m =>
-            new ShortData(
-                m.Text,
-                JsonSerializer.Deserialize<Details>(m.Details)
-            )
-        );
-
-        return shortMsg.ToArray();
-    }
-
-    public ShortData[] FindByCallId(string value)
-    {
-        using var ctx = CreateContext();
-        var messages =
-            ctx.Calls
-                .Where(с => с.CallId == value)
-                .SelectMany(с =>
-                        ctx.Messages
-                            .Where(m => с.LocalCallId == m.LocalCallId && DateOnly.FromDateTime(с.Date) == m.Date)
-                            .DefaultIfEmpty(),
-                    (c, m) => m);
-
-        var shortMsg = messages.ToList().Select(m =>
-            new ShortData(
-                m.Text,
-                JsonSerializer.Deserialize<Details>(m.Details)
-            )
-        );
-
-        return shortMsg.ToArray();
-    }
-    
-    public ShortData[] FindByHeaderAndDate(string header, DateOnly date)
-    {
-        using var ctx = CreateContext();
-        var messages =
-            ctx.Headers
-                .Where(h => h.Value == header && h.At == date)
-                .SelectMany(h =>
-                        ctx.Messages
-                            .Where(m => h.LocalCallId == m.LocalCallId && h.At == m.Date)
-                            .DefaultIfEmpty(),
-                    (h, m) => m);
-
-        var shortMsg = messages.ToList().Select(m =>
-            new ShortData(
-                m.Text,
-                JsonSerializer.Deserialize<Details>(m.Details)
-            )
-        );
-
-        return shortMsg.ToArray();
-    }
-
-    private Call GetCallCaching(CallsContext ctx, Data data)
+    private Call? GetCallCaching(CallsContext ctx, Data data)
     {
         return _cache.GetOrCreate(data.CallId + data.Host,
             (r =>
@@ -148,7 +76,7 @@ public class CallsRepository : ICallsRepository, IDisposable
     }
 
 
-    private Call GetCall(CallsContext ctx, Data data)
+    private Call? GetCall(CallsContext ctx, Data data)
     {
         return ctx.Calls.FirstOrDefault(call => call.CallId == data.CallId &&
                                                 call.Host == data.Host.ToString() &&

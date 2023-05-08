@@ -37,3 +37,10 @@ var builder = Host.CreateDefaultBuilder(args)
 var host = builder.Build();
 
 await host.RunAsync().ConfigureAwait(false);
+
+//"Address": "ds-sipcapture-pg01.ds.ast.local:5432",
+//"Database": "sipcapture_data",
+//"Username": "demo",
+//"Password": "demo",
+//"MaxConnections": 50,
+//"Schema": "partman"

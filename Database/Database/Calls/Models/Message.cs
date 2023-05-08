@@ -1,9 +1,7 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
-namespace Capture.Service.Database.Calls.Models;
+namespace Database.Database.Calls.Models;
 
 [Table("messages")]
 public class Message

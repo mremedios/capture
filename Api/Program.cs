@@ -1,6 +1,5 @@
-using Capture.Service.Database;
-using Capture.Service.Database.Calls;
-using Microsoft.AspNetCore.Cors.Infrastructure;
+using Database.Database;
+using Database.Database.Calls;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +20,7 @@ builder.Services.AddSwaggerGen();
             .WithExposedHeaders("*");
     });
 });*/
-    
+
 
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
@@ -29,7 +28,7 @@ builder.Configuration
 
 builder.Services
     .AddSingleton<IAvailableHeaderRepository, AvailableHeaderRepository>()
-    .AddSingleton<ICallsRepository, CallsRepository>()
+    .AddSingleton<IReadonlyRepository, ReadonlyRepository>()
     .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
     .AddSingleton<IPartmanRepository, PartmanRepository>();
 

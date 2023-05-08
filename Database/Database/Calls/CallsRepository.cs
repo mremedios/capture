@@ -39,8 +39,80 @@ public class CallsRepository : ICallsRepository, IDisposable
             ctx.SaveChanges();
         }
     }
+    
+    
 
+<<<<<<<< HEAD:Database/Database/Calls/CallsRepository.cs
     private Call? GetCallCaching(CallsContext ctx, Data data)
+========
+    public ShortData[] FindByHeader(string header)
+    {
+        using var ctx = CreateContext();
+        var messages =
+            ctx.Headers
+                .Where(h => h.Value == header)
+                .SelectMany(h =>
+                        ctx.Messages
+                            .Where(m => h.LocalCallId == m.LocalCallId && h.At == m.Date)
+                            .DefaultIfEmpty(),
+                    (h, m) => m);
+
+        var shortMsg = messages.ToList().Select(m =>
+            new ShortData(
+                m.Text,
+                JsonSerializer.Deserialize<Details>(m.Details)
+            )
+        );
+
+        return shortMsg.ToArray();
+    }
+
+    public ShortData[] FindByCallId(string value)
+    {
+        using var ctx = CreateContext();
+        var messages =
+            ctx.Calls
+                .Where(с => с.CallId == value)
+                .SelectMany(с =>
+                        ctx.Messages
+                            .Where(m => с.LocalCallId == m.LocalCallId && DateOnly.FromDateTime(с.Date) == m.Date)
+                            .DefaultIfEmpty(),
+                    (c, m) => m);
+
+        var shortMsg = messages.ToList().Select(m =>
+            new ShortData(
+                m.Text,
+                JsonSerializer.Deserialize<Details>(m.Details)
+            )
+        );
+
+        return shortMsg.ToArray();
+    }
+    
+    public ShortData[] FindByHeaderAndDate(string header, DateOnly date)
+    {
+        using var ctx = CreateContext();
+        var messages =
+            ctx.Headers
+                .Where(h => h.Value == header && h.At == date)
+                .SelectMany(h =>
+                        ctx.Messages
+                            .Where(m => h.LocalCallId == m.LocalCallId && h.At == m.Date)
+                            .DefaultIfEmpty(),
+                    (h, m) => m);
+
+        var shortMsg = messages.ToList().Select(m =>
+            new ShortData(
+                m.Text,
+                JsonSerializer.Deserialize<Details>(m.Details)
+            )
+        );
+
+        return shortMsg.ToArray();
+    }
+
+    private Call GetCallCaching(CallsContext ctx, Data data)
+>>>>>>>> origin/api:Application/capture/Service/Database/Calls/CallsRepository.cs
     {
         return _cache.GetOrCreate(data.CallId + data.Host,
             (r =>

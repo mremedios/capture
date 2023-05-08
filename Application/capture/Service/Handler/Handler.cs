@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -22,16 +23,22 @@ public class Handler : IHandler, IDisposable
     private readonly BufferedTaskQueue<Data> _dbQueue;
     private readonly IOptionsProvider _provider;
     private readonly Timer _timer;
+    private Stopwatch _stopwatch = new Stopwatch();
+
+    private volatile int _counter = 0;
+    private volatile bool _isWatched = false;
+
+    private const int BufferSize = 100;
 
     public Handler(ILogger<Handler> logger, ICallsRepository repository, IOptionsProvider provider)
     {
         _logger = logger;
         _repository = repository;
         _parseQueue = new TaskQueue<ReceivedData>(Parse, ParsingErrorHandler);
-        _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: 1000, exceptionHandler: SavingErrorHandler);
+        _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: BufferSize, exceptionHandler: SavingErrorHandler);
         _provider = provider;
         _timer = new Timer((e) => { _logger.LogDebug("Parser queue size {0}", _parseQueue.TaskCount); }, null,
-            TimeSpan.Zero, TimeSpan.FromSeconds(5));
+            TimeSpan.Zero, TimeSpan.FromSeconds(60));
     }
 
     private void Parse(ReceivedData data)
@@ -56,11 +63,15 @@ public class Handler : IHandler, IDisposable
 
     private async Task Save(IList<Data> data)
     {
+        
         await _repository.InsertRangeAsync(data);
+        Interlocked.Add(ref _counter, BufferSize);
+        _logger.LogCritical("{0}, {1}", _counter, _stopwatch.ElapsedMilliseconds);
     }
 
     public void HandleMessage(ReceivedData data)
     {
+        _stopwatch.Start();
         _parseQueue.EnqueueTask(data);
     }
 

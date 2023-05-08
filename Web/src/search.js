@@ -29,9 +29,6 @@ async function sequenceDiagram(header, value, date, url) {
 document.getElementById('search-button').onclick = async function () {
     let header = document.getElementById('search-header').value
     let value = document.getElementById('search-value').value
-    // let from = document.getElementById('search-from').value
-    // let to = document.getElementById('search-to').value
-
     let date = document.getElementById('search-date').value
 
     let start = performance.now()

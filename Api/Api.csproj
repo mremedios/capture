@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Application\capture\Capture.csproj" />
+      <ProjectReference Include="..\Database\Database.csproj" />
     </ItemGroup>
 
 </Project>

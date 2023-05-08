@@ -13,6 +13,7 @@
   <include file="procedures.sql" relativeToChangelogFile="true" labels="Tables"/>
   <include file="indexes.sql" relativeToChangelogFile="true" labels="Tables"/>
   <include file="partman.sql" relativeToChangelogFile="true" labels="Tables"/>
+  <include file="changes.sql" relativeToChangelogFile="true" labels="Tables"/>
   
 </databaseChangeLog>
 

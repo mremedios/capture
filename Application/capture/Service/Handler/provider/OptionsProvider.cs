@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Database.Database;
 using Database.Models;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Capture.Service.Handler.provider;
 
@@ -14,7 +15,7 @@ public class OptionsProvider : IOptionsProvider
     private readonly IAvailableHeaderRepository _repo;
     private readonly IMethodsRepository _methodsRepository;
     private Timer _timer;
-
+    
     public OptionsProvider(IAvailableHeaderRepository repository, IMethodsRepository methodsRepository)
     {
         _repo = repository;
@@ -29,7 +30,7 @@ public class OptionsProvider : IOptionsProvider
             var methods = new HashSet<SipMethods>(_methodsRepository.FindAll());
             Interlocked.Exchange(ref _availableHeaders, nv);
             Interlocked.Exchange(ref _excludedMethods, methods);
-        }, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+        }, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
 
         return Task.CompletedTask;
     }

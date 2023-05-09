@@ -51,17 +51,11 @@ namespace Capture.Service.Listener
 
         private async Task CaptureAsync()
         {
-            // var fileName = $"HEP_sample_{DateTime.Now:yyyyMMdd_hhmmss}.bin";
-            // var fileOutputStream = File.OpenWrite(fileName);
-
             try
             {
                 while (!_cts.Token.IsCancellationRequested)
                 {
                     var x = await _listener.ReceiveAsync(_cts.Token);
-                    _logger.LogDebug("Handle message from {}" ,x.RemoteEndPoint);
-                    // Interlocked.Increment(ref _count);
-                    // if (_count % 100 == 0) _logger.LogCritical(_count.ToString());
                     _handler.HandleMessage(new ReceivedData(x.Buffer, x.RemoteEndPoint, DateTime.Now));
                 }
             }

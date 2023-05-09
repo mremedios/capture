@@ -8,5 +8,5 @@ namespace Database.Database.Calls.Models;
 public class Method
 {
     [Key, Column("method")] 
-    public SipMethods Value { get; set; }
+    public string Value { get; set; }
 }

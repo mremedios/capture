@@ -1,5 +1,6 @@
 using Database.Database.Calls.Models;
 using Database.Models;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Database.Database.Calls;
 
@@ -16,7 +17,7 @@ public class MethodsRepository : IMethodsRepository
     {
         using var ctx = _contextFactory.CreateContext();
         await ctx.Methods.AddRangeAsync(
-            methods.Select(h => new Method { Value = h })
+            methods.Select(h => new Method { Value = h.ToString() })
         );
         ctx.SaveChanges();
     }
@@ -26,7 +27,7 @@ public class MethodsRepository : IMethodsRepository
     {
         using var ctx = _contextFactory.CreateContext();
         ctx.Methods.RemoveRange(
-            methods.Select(h => new Method { Value = h })
+            methods.Select(h => new Method { Value = h.ToString() })
         );
         ctx.SaveChanges();
     }
@@ -34,6 +35,6 @@ public class MethodsRepository : IMethodsRepository
     public SipMethods[] FindAll()
     {
         using var ctx = _contextFactory.CreateContext();
-        return ctx.Methods.Select(x => x.Value).ToArray();
+        return ctx.Methods.Select(x => Enum.Parse<SipMethods>(x.Value)).ToArray();
     }
 }

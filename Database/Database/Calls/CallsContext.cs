@@ -21,11 +21,9 @@ public class CallsContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var converter = new EnumToStringConverter<SipMethods>();
         modelBuilder.HasDefaultSchema("partman");
-        modelBuilder.Entity<Method>().Property(x => x.Value).HasConversion(converter);
     }
-
+    
     // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     //     => optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Error);
 }

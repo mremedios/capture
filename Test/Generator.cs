@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Npgsql.Internal.TypeHandlers;
 
 namespace Test;
 
@@ -14,25 +13,19 @@ public class Generator
     {
         var _stopwatch = new Stopwatch();
         _stopwatch.Start();
-        var client = new UdpClient();
-        client.Connect(IPAddress.Loopback, 9060);
-        var msgInCall = 4;
-        var group = 2;
+        var client1 = new UdpClient();
+        client1.Connect(IPAddress.Loopback, 9060);
+        var msgInCall = 20;
+        var group = 10;
             
-        for (int i = 0; i < 2000; i++)
+        for (int i = 0; i < 1000; i++)
         {
             var msg = ToByteArray(ByTemplate(i.ToString()));
             for (int j = 0; j < msgInCall; j++)
             {
-                client.Send(msg);
-                if ((i * msgInCall + j)  % group == 0) Thread.Sleep(1);
+                client1.Send(msg);
             }
-            
-
-            if (i % 100 == 0)
-            {
-                Console.WriteLine(i);
-            }
+            Thread.Sleep(1);
         }
 
         _stopwatch.Stop();

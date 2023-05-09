@@ -33,7 +33,9 @@ public class AvailableHeaderRepository: IAvailableHeaderRepository
 
     public string[] FindAll()
     {
-        using var ctx = _contextFactory.CreateContext();
-        return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
+        using (var ctx = _contextFactory.CreateContext())
+        {
+            return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
+        }
     }
 }

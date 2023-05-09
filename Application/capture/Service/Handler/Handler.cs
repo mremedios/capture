@@ -28,7 +28,7 @@ public class Handler : IHandler, IDisposable
     private volatile int _counter = 0;
     private volatile bool _isWatched = false;
 
-    private const int BufferSize = 700;
+    private const int BufferSize = 200;
 
     public Handler(ILogger<Handler> logger, ICallsRepository repository, IOptionsProvider provider)
     {
@@ -64,15 +64,14 @@ public class Handler : IHandler, IDisposable
 
     private async Task Save(IList<Data> data)
     {
-        
+        _stopwatch.Start();
         await _repository.InsertRangeAsync(data);
         Interlocked.Add(ref _counter, BufferSize);
-        _logger.LogCritical(", {1}", _stopwatch.ElapsedMilliseconds);
+        _logger.LogCritical(", {1}", _stopwatch.ElapsedMilliseconds / 1000.0);
     }
 
     public void HandleMessage(ReceivedData data)
     {
-        _stopwatch.Start();
         _parseQueue.EnqueueTask(data);
     }
 

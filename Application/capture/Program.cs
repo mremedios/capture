@@ -23,6 +23,7 @@ var builder = Host.CreateDefaultBuilder(args)
             .AddHostedService<HostedService>()
             .AddSingleton<ICallsRepository, CallsRepository>()
             .AddSingleton<IAvailableHeaderRepository, AvailableHeaderRepository>()
+            .AddSingleton<IMethodsRepository, MethodsRepository>()
             .AddSingleton<IHandler, Handler>()
             .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
             .AddSingleton<IOptionsProvider, OptionsProvider>();

@@ -3,36 +3,6 @@
     let standard = joint.shapes.standard;
     let dia = joint.dia;
 
-    standard.Rectangle.define('sd.RoleGroup', {
-        z: 1,
-        attrs: {
-            body: {
-                stroke: '#DDDDDD',
-                strokeWidth: 1,
-                fill: '#F9FBFA'
-            },
-            label: {
-                refY: null,
-                refX: null,
-                y: 'calc(h+2)',
-                x: 'calc(w/2)',
-                textAnchor: 'middle',
-                textVerticalAnchor: 'top',
-                fontSize: 12,
-                fontFamily: 'sans-serif',
-                textWrap: {
-                    width: -10
-                }
-            }
-        }
-    }, {
-        placeholder: 'What\'s the group\'s name?',
-
-        fitRoles: function () {
-            this.fitEmbeds({padding: 10});
-        }
-    });
-
     standard.Rectangle.define('sd.Role', {
         z: 2,
         size: {width: 100, height: 80},
@@ -163,7 +133,7 @@
                 selector: 'labelText'
             }, {
                 tagName: 'text',
-                selector: 'buttonLabel'
+                selector: 'time'
             }
             ],
             attrs: {
@@ -185,7 +155,7 @@
                     textVerticalAnchor: 'middle',
                     cursor: 'pointer'
                 },
-                buttonLabel: {
+                time: {
                     pointerEvents: 'none',
                     x: 'calc(x)',
                     y: 19,
@@ -211,72 +181,11 @@
                     {
                         labelText:
                             {text: description},
-                        buttonLabel:
+                        time:
                             {text: time}
                     }
             },
             ]);
-        }
-    });
-
-    dia.Element.define('sd.Details', {
-        attrs: {
-            body: {
-                width: 'calc(w)',
-                height: 'calc(h)',
-                strokeWidth: 2,
-                stroke: 'black',
-                fill: 'white'
-            },
-            label: {
-                textVerticalAnchor: 'middle',
-                textAnchor: 'left',
-                x: 'calc(0.01 * w) ',
-                y: 'calc(0.5*h)',
-                fontSize: 14,
-                fill: 'black'
-            },
-            button: {
-                cursor: 'pointer',
-                ref: 'buttonLabel',
-                width: 'calc(1.5*w)',
-                height: 'calc(1.5*h)',
-                x: 'calc(x-calc(0.25*w))',
-                y: 'calc(y-calc(0.25*h))',
-                event: 'details:button:pointerdown',
-                fill: '#FFF123',
-                stroke: 'black',
-                strokeWidth: 2
-            },
-            buttonLabel: {
-                pointerEvents: 'none',
-                x: 'calc(w)',
-                y: 0,
-                textAnchor: 'middle',
-                textVerticalAnchor: 'middle',
-                text: ' x ',
-                fill: 'black',
-                fontSize: 8,
-                fontWeight: 'bold'
-            }
-        }
-    }, {
-        markup: [{
-            tagName: 'rect',
-            selector: 'body',
-        }, {
-            tagName: 'text',
-            selector: 'label'
-        }, {
-            tagName: 'rect',
-            selector: 'button'
-        }, {
-            tagName: 'text',
-            selector: 'buttonLabel'
-        }
-        ],
-        setText: function (text) {
-            this.attr(['label', 'text'], text);
         }
     });
 

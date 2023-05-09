@@ -28,6 +28,7 @@ builder.Configuration
 
 builder.Services
     .AddSingleton<IAvailableHeaderRepository, AvailableHeaderRepository>()
+    .AddSingleton<IMethodsRepository, MethodsRepository>()
     .AddSingleton<IReadonlyRepository, ReadonlyRepository>()
     .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
     .AddSingleton<IPartmanRepository, PartmanRepository>();

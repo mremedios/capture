@@ -28,7 +28,7 @@ public class Handler : IHandler, IDisposable
     private volatile int _counter = 0;
     private volatile bool _isWatched = false;
 
-    private const int BufferSize = 100;
+    private const int BufferSize = 700;
 
     public Handler(ILogger<Handler> logger, ICallsRepository repository, IOptionsProvider provider)
     {
@@ -44,7 +44,8 @@ public class Handler : IHandler, IDisposable
     private void Parse(ReceivedData data)
     {
         var message = ParserHePv3.ParseMessage(data.Msg);
-        if (!_provider.GetExcludedMethods().Contains(message.Sip.CSeqMethod.ToString()))
+        var sipMethod = Enum.Parse<SipMethods>(message.Sip.CSeqMethod.ToString());
+        if (!_provider.GetExcludedMethods().Contains(sipMethod))
         {
             var d = GetData(message, data.EndPoint, data.Time);
             _dbQueue.EnqueueTask(d);
@@ -66,7 +67,7 @@ public class Handler : IHandler, IDisposable
         
         await _repository.InsertRangeAsync(data);
         Interlocked.Add(ref _counter, BufferSize);
-        _logger.LogCritical("{0}, {1}", _counter, _stopwatch.ElapsedMilliseconds);
+        _logger.LogCritical(", {1}", _stopwatch.ElapsedMilliseconds);
     }
 
     public void HandleMessage(ReceivedData data)

@@ -1,9 +1,11 @@
 using Database.Database.Calls;
 using Database.Database.Calls.Models;
+using Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Npgsql.NameTranslation;
 
 namespace Database.Database;
 
@@ -24,16 +26,17 @@ public class PostgreSqlContextFactory : IContextFactory
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
         var builder = new DbContextOptionsBuilder<CallsContext>();
-
+        
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
         dataSourceBuilder.MapComposite<CallHeader>("header_type");
-
+        
         var dataSource = dataSourceBuilder.Build();
 
         builder.UseNpgsql(dataSource)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             .LogTo(Console.WriteLine, LogLevel.Error);
-
+        
+       
         return new CallsContext(builder.Options);
     }
 }

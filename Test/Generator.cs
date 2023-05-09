@@ -16,20 +16,23 @@ public class Generator
         _stopwatch.Start();
         var client = new UdpClient();
         client.Connect(IPAddress.Loopback, 9060);
-        for (int i = 0; i < 2; i++)
+        var msgInCall = 4;
+        var group = 2;
+            
+        for (int i = 0; i < 2000; i++)
         {
             var msg = ToByteArray(ByTemplate(i.ToString()));
-            for (int j = 0; j < 4; j++)
+            for (int j = 0; j < msgInCall; j++)
             {
                 client.Send(msg);
+                if ((i * msgInCall + j)  % group == 0) Thread.Sleep(1);
             }
             
+
             if (i % 100 == 0)
             {
                 Console.WriteLine(i);
             }
-            
-            Thread.Sleep(1);
         }
 
         _stopwatch.Stop();

@@ -52,7 +52,7 @@ namespace Capture.Service.Listener
         private async Task reсeive()
         {
             var x = await _listener.ReceiveAsync(_cts.Token);
-            // _handler.HandleMessage(x);
+            _handler.HandleMessage(x);
         }
         
         private async Task CaptureAsync()

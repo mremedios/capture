@@ -49,14 +49,22 @@ namespace Capture.Service.Listener
             _task = CaptureAsync();
         }
 
+        private async Task reсeive()
+        {
+            var x = await _listener.ReceiveAsync(_cts.Token);
+            // _handler.HandleMessage(x);
+        }
+        
         private async Task CaptureAsync()
         {
+            var counter = 1;
             try
             {
                 while (!_cts.Token.IsCancellationRequested)
                 {
-                    var x = await _listener.ReceiveAsync(_cts.Token);
-                    _handler.HandleMessage(new ReceivedData(x.Buffer, x.RemoteEndPoint, DateTime.Now));
+                    await reсeive();
+                    counter += 1;
+                    if (counter % 100 == 0) Console.WriteLine(counter);
                 }
             }
             catch (Exception e)

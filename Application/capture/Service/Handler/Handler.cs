@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ public class Handler : IHandler, IDisposable
 {
     private readonly ILogger<Handler> _logger;
     private readonly ICallsRepository _repository;
-    private readonly TaskQueue<ReceivedData> _parseQueue;
+    private readonly TaskQueue<UdpReceiveResult> _parseQueue;
     private readonly BufferedTaskQueue<Data> _dbQueue;
     private readonly IOptionsProvider _provider;
     private readonly Timer _timer;
@@ -28,21 +29,22 @@ public class Handler : IHandler, IDisposable
     private volatile int _counter = 0;
     private volatile bool _isWatched = false;
 
-    private const int BufferSize = 200;
+    private const int BufferSize = 1000;
 
     public Handler(ILogger<Handler> logger, ICallsRepository repository, IOptionsProvider provider)
     {
         _logger = logger;
         _repository = repository;
-        _parseQueue = new TaskQueue<ReceivedData>(Parse, ParsingErrorHandler);
+        _parseQueue = new TaskQueue<UdpReceiveResult>(Parse, ParsingErrorHandler);
         _dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: BufferSize, exceptionHandler: SavingErrorHandler);
         _provider = provider;
         _timer = new Timer((e) => { _logger.LogDebug("Parser queue size {0}", _parseQueue.TaskCount); }, null,
             TimeSpan.Zero, TimeSpan.FromSeconds(60));
     }
 
-    private void Parse(ReceivedData data)
+    private void Parse(UdpReceiveResult r)
     {
+        var data = new ReceivedData(r.Buffer, r.RemoteEndPoint, DateTime.Now);
         var message = ParserHePv3.ParseMessage(data.Msg);
         var sipMethod = Enum.Parse<SipMethods>(message.Sip.CSeqMethod.ToString());
         if (!_provider.GetExcludedMethods().Contains(sipMethod))
@@ -52,7 +54,7 @@ public class Handler : IHandler, IDisposable
         }
     }
 
-    private void ParsingErrorHandler(Exception e, ReceivedData y)
+    private void ParsingErrorHandler(Exception e, UdpReceiveResult y)
     {
         _logger.LogWarning("Error parsing message: {0}", e.Message);
     }
@@ -64,15 +66,15 @@ public class Handler : IHandler, IDisposable
 
     private async Task Save(IList<Data> data)
     {
-        _stopwatch.Start();
+        // _stopwatch.Start();
         await _repository.InsertRangeAsync(data);
-        Interlocked.Add(ref _counter, BufferSize);
-        _logger.LogCritical(", {1}", _stopwatch.ElapsedMilliseconds / 1000.0);
+        // Interlocked.Add(ref _counter, BufferSize);
+        // _logger.LogCritical(", {1}", _stopwatch.ElapsedMilliseconds / 1000.0);
     }
-
-    public void HandleMessage(ReceivedData data)
+    
+    public void HandleMessage(UdpReceiveResult r)
     {
-        _parseQueue.EnqueueTask(data);
+        _parseQueue.EnqueueTask(r);
     }
 
     private Data GetData(Message msg, IPEndPoint endPoint, DateTime time)

@@ -114,22 +114,8 @@ namespace Capture.Service.TaskQueue
         public bool EnqueueTask(T value)
         {
             var result = _tasks.Post(value);
-            _checkForThresholds?.Invoke(1);
 
             return result;
-        }
-
-        public void EnqueueTasks(IEnumerable<T> values)
-        {
-            int addedCount = 0;
-
-            foreach (var value in values)
-            {
-                _tasks.Post(value);
-                addedCount++;
-            }
-
-            _checkForThresholds?.Invoke(addedCount);
         }
 
         public int TaskCount => _tasks.InputCount;

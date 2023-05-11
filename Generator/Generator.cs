@@ -4,35 +4,32 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Test;
+namespace Generator;
 
-public class Generator
+public static class Generator
 {
-    [Test]
-    public void Start()
+    private static void Main(string[] args)
     {
-        var _stopwatch = new Stopwatch();
-        _stopwatch.Start();
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
         var client1 = new UdpClient();
         client1.Connect(IPAddress.Loopback, 9060);
-        var msgInCall = 20;
-        var group = 10;
-            
-        for (int i = 0; i < 1000; i++)
+        var msgInCall = 5;
+
+        for (int i = 0; i < 2000; i++)
         {
             var msg = ToByteArray(ByTemplate(i.ToString()));
             for (int j = 0; j < msgInCall; j++)
             {
                 client1.Send(msg);
             }
-            Thread.Sleep(1);
         }
 
-        _stopwatch.Stop();
-        Console.WriteLine(_stopwatch.ElapsedMilliseconds);
+        stopwatch.Stop();
+        Console.WriteLine(stopwatch.ElapsedMilliseconds);
     }
 
-    private byte[] ToByteArray(string s)
+    private static byte[] ToByteArray(string s)
     {
         return s
             .Split('-')
@@ -40,7 +37,7 @@ public class Generator
             .ToArray();
     }
 
-    private string ByTemplate(string idstr)
+    private static string ByTemplate(string idstr)
     {
         var id = BitConverter.ToString(Encoding.UTF8.GetBytes(idstr));
 

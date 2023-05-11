@@ -36,7 +36,7 @@ namespace Capture.Service.Listener
 			_cts?.Dispose();
 		}
 
-		public async Task StartAsync(CancellationToken ct)
+		public Task StartAsync(CancellationToken ct)
 		{
 			_cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
@@ -46,6 +46,8 @@ namespace Capture.Service.Listener
 
 			_logger.LogInformation("Start udp listener");
 			_task = CaptureAsync();
+
+			return Task.CompletedTask;
 		}
 
 		private async Task Reсeive()

@@ -1,24 +1,19 @@
-using Capture.Service.Listener;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Capture.Service.Database;
-using Capture.Service.Handler;
 using Capture.Service.Handler.provider;
+using Microsoft.Extensions.Hosting;
 
 namespace Capture.Service;
 
 public class HostedService : IHostedService
 {
     private readonly ICapture[] _captures;
-    private readonly IHeadersProvider _provider;
+    private readonly IOptionsProvider _provider;
     private CancellationTokenSource _cts;
 
-    public HostedService(IEnumerable<ICapture> captures, IHeadersProvider provider)
+    public HostedService(IEnumerable<ICapture> captures, IOptionsProvider provider)
     {
         _captures = captures.ToArray();
         _provider = provider;

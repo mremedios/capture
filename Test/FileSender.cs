@@ -1,9 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.RegularExpressions;
-using WebSocketSharp;
 
 namespace Test;
 
@@ -21,10 +19,10 @@ public class FileSender
                 var str = BitConverter.ToString(buffer, 0, read);
                 var packages = Regex.Split(last + str, @"(?=48-45-50-33)");
                 last = packages.Last();
-                last = last.IsNullOrEmpty() ? last : last + "-";
+                last = last.Length == 0? last : last + "-";
                 foreach (var package in packages.SkipLast(1))
                 {
-                    if (!package.IsNullOrEmpty())
+                    if (package.Length != 0)
                     {
                         var s = package.Trim();
                         var byteStr = s.EndsWith('-') ? s.Remove(s.Length - 1) : s;
@@ -44,13 +42,15 @@ public class FileSender
         }
     }
 
-    public static void Start()
+    [Test]
+    public void Start()
     {
         // using Stream input = File.OpenRead("input/HEP_sample_20221202_095623.bin");
-        using Stream input = File.OpenRead("input/HEP_sample_20221202_103917.bin");
+        // using Stream input = File.OpenRead("input/HEP_sample_20221202_103917.bin");
         // using Stream input = File.OpenRead("input/somepack.bin");
+        using Stream input = File.OpenRead("input/in3.bin");
         GetPackages(input, new UdpSender());
-    }
+    }   
 }
 
 internal interface ISender
@@ -72,6 +72,7 @@ internal class UdpSender : ISender
     {
         try
         {
+            
             client.Send(arr);
         }
         catch (Exception e)

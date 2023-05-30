@@ -1,7 +1,7 @@
 using Api.Graph;
 using Api.Graph.Models;
-using Capture.Service.Database;
-using Capture.Service.Models;
+using Database.Database;
+using Database.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -11,9 +11,9 @@ namespace Api.Controllers;
 public class MessageController : ControllerBase
 {
     private readonly ILogger<HeadersController> _logger;
-    private readonly IHeaderRepository _repo;
+    private readonly IReadonlyRepository _repo;
 
-    public MessageController(ILogger<HeadersController> logger, IHeaderRepository repository)
+    public MessageController(ILogger<HeadersController> logger, IReadonlyRepository repository)
     {
         _logger = logger;
         _repo = repository;
@@ -25,10 +25,21 @@ public class MessageController : ControllerBase
         return _repo.FindByHeader(header);
     }
 
+
     [HttpGet(), Route("graph")]
-    public Sequence GraphByHeader(string header)
+    public Sequence GraphByDate(string header, string value, string? date)
     {
-        var messages = _repo.FindByHeader(header);
+        ShortData[] messages;
+
+        if (date == null || DateOnly.TryParse(date, out var dateOnly) == false)
+        {
+            messages = header == "Call-Id" ? _repo.FindByCallId(value) : _repo.FindByHeader(value);
+        }
+        else
+        {
+            messages =  header == "Call-Id" ? _repo.FindByCallIdWithDate(value, dateOnly) :_repo.FindByHeaderWithDate(value, dateOnly);
+        }
+
         return new GraphBuilder(messages).Build();
     }
 }

@@ -38,7 +38,7 @@ namespace Capture.Service.Listener
         {
             _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
-            var homerEndpoint = new IPEndPoint(IPAddress.Parse(_config.HomerAddress), _config.HomerPort);
+            var homerEndpoint = new IPEndPoint(IPAddress.Any, _config.ListenPort); // TODO remove or fix
             var listenEndpoint = new IPEndPoint(IPAddress.Any, _config.ListenPort);
 
             _tcpListener = new TcpListener(listenEndpoint);

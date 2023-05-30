@@ -1,4 +1,4 @@
-using Capture.Service.Database;
+using Database.Database;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;

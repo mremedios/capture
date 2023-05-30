@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using Capture.Service;
-using Capture.Service.Database;
-using Capture.Service.Database.Calls;
 using Capture.Service.Handler;
 using Capture.Service.Handler.provider;
 using Capture.Service.Listener;
+using Database.Database;
+using Database.Database.Calls;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,11 +21,12 @@ var builder = Host.CreateDefaultBuilder(args)
     {
         services.AddSingleton<ICapture, UdpCapture>()
             .AddHostedService<HostedService>()
-            .AddSingleton<IHeaderRepository, CallsRepository>()
+            .AddSingleton<ICallsRepository, CallsRepository>()
             .AddSingleton<IAvailableHeaderRepository, AvailableHeaderRepository>()
+            .AddSingleton<IMethodsRepository, MethodsRepository>()
             .AddSingleton<IHandler, Handler>()
             .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
-            .AddSingleton<IHeadersProvider, HeadersProvider>();
+            .AddSingleton<IOptionsProvider, OptionsProvider>();
     })
     .ConfigureLogging((_, configLogging) =>
     {
@@ -37,3 +38,10 @@ var builder = Host.CreateDefaultBuilder(args)
 var host = builder.Build();
 
 await host.RunAsync().ConfigureAwait(false);
+
+//"Address": "ds-sipcapture-pg01.ds.ast.local:5432",
+//"Database": "sipcapture_data",
+//"Username": "demo",
+//"Password": "demo",
+//"MaxConnections": 50,
+//"Schema": "partman"

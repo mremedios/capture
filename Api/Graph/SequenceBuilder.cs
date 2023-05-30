@@ -1,5 +1,5 @@
 using Api.Graph.Models;
-using Capture.Service.Models;
+using Database.Models;
 
 namespace Api.Graph;
 

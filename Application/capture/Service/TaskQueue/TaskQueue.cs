@@ -15,13 +15,7 @@ namespace Capture.Service.TaskQueue
         private Action<int> _checkForThresholds;
 
         private static int DefaultMaxDegreeOfParallelism => Environment.ProcessorCount * 2;
-
-        /// <summary>
-        /// Инициализирует новый экземпляр класса.
-        /// </summary>
-        /// <param name="runner">метод, который обрабатывает задание</param>
-        /// <param name="exceptionHandler">обработчик исключений, может быть null</param>
-        /// <param name="workerCount">Количество потоков, обрабатывающих задания</param>
+        
         public TaskQueue(Func<T, Task> runner, Action<Exception, T> exceptionHandler = null, int? workerCount = null)
         {
             _exceptionHandler = exceptionHandler;
@@ -43,13 +37,7 @@ namespace Capture.Service.TaskQueue
                     MaxDegreeOfParallelism = workerCount ?? DefaultMaxDegreeOfParallelism
                 });
         }
-
-        /// <summary>
-        /// Инициализирует новый экземпляр класса.
-        /// </summary>
-        /// <param name="runner">метод, который обрабатывает задание</param>
-        /// <param name="exceptionHandler">обработчик исключений, может быть null</param>
-        /// <param name="workerCount">Количество потоков, обрабатывающих задания</param>
+        
         public TaskQueue(Action<T> runner, Action<Exception, T> exceptionHandler = null, int? workerCount = null)
         {
             Action<T> safeRunner = (args) =>
@@ -126,22 +114,8 @@ namespace Capture.Service.TaskQueue
         public bool EnqueueTask(T value)
         {
             var result = _tasks.Post(value);
-            _checkForThresholds?.Invoke(1);
 
             return result;
-        }
-
-        public void EnqueueTasks(IEnumerable<T> values)
-        {
-            int addedCount = 0;
-
-            foreach (var value in values)
-            {
-                _tasks.Post(value);
-                addedCount++;
-            }
-
-            _checkForThresholds?.Invoke(addedCount);
         }
 
         public int TaskCount => _tasks.InputCount;
@@ -152,9 +126,9 @@ namespace Capture.Service.TaskQueue
             {
                 _exceptionHandler?.Invoke(ex, data);
             }
-            catch (Exception exception)
+            catch (Exception ignored)
             {
-                // Logger.Error(new AggregateException(ex, exception));
+                
             }
         }
     }

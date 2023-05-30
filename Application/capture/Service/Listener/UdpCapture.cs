@@ -14,13 +14,11 @@ namespace Capture.Service.Listener
 		private readonly CaptureConfiguration _config;
 		private readonly ILogger<UdpCapture> _logger;
 		private CancellationTokenSource _cts;
-		private IHandler _handler;
+		private readonly IHandler _handler;
 
 		private UdpClient _listener;
 		private UdpClient _homerClient;
 		private Task _task;
-
-		private int _count = 0;
 
 		public UdpCapture(IConfiguration config, ILogger<UdpCapture> logger, IHandler handler)
 		{
@@ -50,22 +48,20 @@ namespace Capture.Service.Listener
 			return Task.CompletedTask;
 		}
 
-		private async Task Reсeive()
+		private async Task Receive()
 		{
 			var x = await _listener.ReceiveAsync(_cts.Token);
-			_handler.HandleMessage(x);
+			
+			_handler.HandleMessage(new ReceivedData(x.Buffer, x.RemoteEndPoint, DateTime.Now));
 		}
 
 		private async Task CaptureAsync()
 		{
-			var counter = 1;
 			try
 			{
 				while (!_cts.Token.IsCancellationRequested)
 				{
-					await Reсeive();
-					counter += 1;
-					if (counter % 100 == 0) Console.WriteLine(counter);
+					await Receive();
 				}
 			}
 			catch (Exception e)

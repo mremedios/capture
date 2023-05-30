@@ -7,4 +7,5 @@ public class DataBaseConnectionConfig
     public string Username { get; set; }
     public string Password { get; set; }
     public string MaxConnections { get; set; }
+    public string Schema { get; set; }
 }

@@ -14,14 +14,14 @@ public static class Generator
         stopwatch.Start();
         var client1 = new UdpClient();
         client1.Connect(IPAddress.Loopback, 9060);
-        var msgInCall = 5;
+        var msgInCall = 4;
 
-        for (int i = 0; i < 2000; i++)
+        for (int i = 0; i < 10; i++)
         {
             var msg = ToByteArray(ByTemplate(i.ToString()));
             for (int j = 0; j < msgInCall; j++)
             {
-                client1.Send(msg);
+               client1.Send(msg);
             }
         }
 

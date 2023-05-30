@@ -3,6 +3,7 @@ using System.Transactions;
 using Database.Database.Calls.Models;
 using Database.Models;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 
 namespace Database.Database.Calls;
 
@@ -10,8 +11,9 @@ public class CallsRepository : ICallsRepository, IDisposable
 {
     private readonly IContextFactory _contextFactory;
     private readonly IMemoryCache _cache;
-
-    public CallsRepository(IContextFactory contextFactory)
+    private String _schema;
+    
+    public CallsRepository(IContextFactory contextFactory, IConfiguration conf)
     {
         _contextFactory = contextFactory;
         _cache = new MemoryCache(
@@ -19,6 +21,7 @@ public class CallsRepository : ICallsRepository, IDisposable
             {
                 SizeLimit = 1024
             });
+        _schema = conf.GetSection("Database").Get<DataBaseConnectionConfig>().Schema;
     }
 
     private CallsContext CreateContext()
@@ -117,7 +120,7 @@ public class CallsRepository : ICallsRepository, IDisposable
             }
         ).Distinct().ToArray();
 
-        await ctx.StoredProcedure("partman.insert_headers", headers);
+        await ctx.StoredProcedure($"{_schema}.insert_headers", headers);
     }
 
     public void Dispose()

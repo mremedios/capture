@@ -18,7 +18,7 @@ public class AvailableHeaderRepository: IAvailableHeaderRepository
         await ctx.AvailableHeaders.AddRangeAsync(
             headers.Select(h => new AvailableHeader { Header = h })
         );
-        ctx.SaveChanges();
+        await ctx.SaveChangesAsync();
     }
     
 
@@ -33,9 +33,7 @@ public class AvailableHeaderRepository: IAvailableHeaderRepository
 
     public string[] FindAll()
     {
-        using (var ctx = _contextFactory.CreateContext())
-        {
-            return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
-        }
+        using var ctx = _contextFactory.CreateContext();
+        return ctx.AvailableHeaders.Select(x => x.Header).ToArray();
     }
 }

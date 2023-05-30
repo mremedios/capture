@@ -7,6 +7,8 @@ namespace Database.Database.Calls;
 
 public class CallsContext : DbContext
 {
+    private String _schema;
+    
     public DbSet<CallHeader> Headers { get; set; }
     public DbSet<Call> Calls { get; set; }
     public DbSet<Message> Messages { get; set; }
@@ -14,14 +16,15 @@ public class CallsContext : DbContext
     public DbSet<Method> Methods { get; set; }
 
 
-    public CallsContext(DbContextOptions options) : base(options)
+    public CallsContext(String schema, DbContextOptions options) : base(options)
     {
+        _schema = schema;
     }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema("partman");
+        modelBuilder.HasDefaultSchema(_schema);
     }
     
     // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

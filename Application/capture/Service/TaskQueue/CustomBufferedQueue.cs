@@ -9,7 +9,7 @@ namespace Capture.Service.TaskQueue;
 
 public class CustomBufferedQueue<T> : IDisposable
 {
-	private const int BufferSize = 1000;
+	private const int BufferSize = 4000;
 	private const int MaxBufferSize = BufferSize * 2;
 
 	private bool _isDisposed;
@@ -32,7 +32,7 @@ public class CustomBufferedQueue<T> : IDisposable
 		_queue = new TaskQueue<List<T>>(HandleBatch, SavingErrorHandler, 1);
 		_timer = new Timer(_ => RunFlush());
 
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 15; i++)
 		{
 			_listBuffer.Push(new List<T>(MaxBufferSize));
 		}

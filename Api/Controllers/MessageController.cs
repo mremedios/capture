@@ -39,7 +39,7 @@ public class MessageController : ControllerBase
         {
             messages =  header == "Call-Id" ? _repo.FindByCallIdWithDate(value, dateOnly) :_repo.FindByHeaderWithDate(value, dateOnly);
         }
-
+    
         return new GraphBuilder(messages).Build();
     }
 }

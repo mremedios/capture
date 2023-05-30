@@ -79,6 +79,7 @@ function drawDiagram(obj, element) {
 
 
     function fill(data) {
+        console.log(data['messages'].length)
         data['endpoints'].forEach(role => addDestination(role))
         data['messages'].forEach((el, i) =>
             addMessage(i, el.label.substring(0, 50), el.from, el.to, el.at)

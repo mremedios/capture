@@ -111,11 +111,11 @@ namespace Capture.Service.TaskQueue
             return stopped;
         }
 
-        public bool EnqueueTask(T value)
+        public async Task EnqueueTask(T value)
         {
-            var result = _tasks.Post(value);
+            await _tasks.SendAsync(value);
 
-            return result;
+            // return result;
         }
 
         public int TaskCount => _tasks.InputCount;

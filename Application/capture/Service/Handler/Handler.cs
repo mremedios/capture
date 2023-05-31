@@ -7,11 +7,11 @@ using Database.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Capture.Service.Handler;
@@ -20,46 +20,76 @@ public class Handler : IHandler, IDisposable
 {
 	private readonly ILogger<Handler> _logger;
 	private readonly ICallsRepository _repository;
-	private readonly TaskQueue<UdpReceiveResult> _parseQueue;
 	private readonly BufferedTaskQueue<Data> _dbQueue;
-	private readonly CustomBufferedQueue<string> _tmp;
 	private readonly IOptionsProvider _provider;
-	private readonly Timer _timer;
-	private Stopwatch _stopwatch = new Stopwatch();
-
-	private volatile int _counter = 0;
-	private volatile bool _isWatched = false;
 
 	private const int BufferSize = 1000;
 
-	public Handler(ILogger<Handler> logger, ILogger<CustomBufferedQueue<string>> logger2, ICallsRepository repository, IOptionsProvider provider)
+	private readonly Channel<ReceivedData> _channel = Channel.CreateUnbounded<ReceivedData>(
+		new UnboundedChannelOptions
+		{
+			SingleWriter = true,
+			SingleReader = false,
+		});
+
+	private ChannelWriter<ReceivedData> writer;
+	private IEnumerable<ChannelReader<ReceivedData>> _readers;
+	private CancellationTokenSource _cts;
+
+	public Handler(ILogger<Handler> logger,
+		ICallsRepository repository,
+		IOptionsProvider provider)
 	{
 		_logger = logger;
 		_repository = repository;
-		_parseQueue = new TaskQueue<UdpReceiveResult>(Parse, ParsingErrorHandler);
 		_dbQueue = new BufferedTaskQueue<Data>(Save, bufferSize: BufferSize, exceptionHandler: SavingErrorHandler);
 		_provider = provider;
-		_timer = new Timer((e) => { _logger.LogDebug("Parser queue size {0}", _parseQueue.TaskCount); }, null,
-			TimeSpan.Zero, TimeSpan.FromSeconds(60));
-
-		_tmp = new CustomBufferedQueue<string>(_ => Task.CompletedTask, logger2);
+		writer = _channel;
+		_readers = new[] { _channel.Reader, _channel.Reader };
 	}
 
-	private void Parse(UdpReceiveResult r)
+	public IEnumerable<Task> StartAsync(CancellationToken ct)
 	{
-		var data = new ReceivedData(r.Buffer, r.RemoteEndPoint, DateTime.Now);
-		var message = ParserHePv3.ParseMessage(data.Msg);
-		var sipMethod = Enum.Parse<SipMethods>(message.Sip.CSeqMethod.ToString());
-		if (!_provider.GetExcludedMethods().Contains(sipMethod))
+		_cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+		_logger.LogInformation("Start consumers");
+		var tasks = _readers.Select(ConsumeAsync);
+		return tasks;
+	}
+
+	private async Task ConsumeAsync(ChannelReader<ReceivedData> reader, int i)
+	{
+		try
 		{
-			var d = GetData(message, data.EndPoint, data.Time);
-			_dbQueue.EnqueueTask(d);
+			while (await reader.WaitToReadAsync(_cts.Token))
+			{
+				while (reader.TryRead(out ReceivedData data))
+				{
+					Parse(data);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			_logger.LogInformation("Consumer error: {0}", e);
 		}
 	}
 
-	private void ParsingErrorHandler(Exception e, UdpReceiveResult y)
+	private void Parse(ReceivedData data)
 	{
-		_logger.LogWarning("Error parsing message: {0}", e.Message);
+		try
+		{
+			var message = ParserHePv3.ParseMessage(data.Msg);
+			var sipMethod = message.Sip.CSeqMethod.ToModel();
+			if (!_provider.GetExcludedMethods().Contains(sipMethod))
+			{
+				var d = GetData(message, data.EndPoint, data.Time);
+				_dbQueue.EnqueueTask(d);
+			}
+		}
+		catch (Exception e)
+		{
+			_logger.LogWarning("Error parsing message: {0}", e.Message);
+		}
 	}
 
 	private void SavingErrorHandler(Exception e, IList<Data> y)
@@ -67,18 +97,18 @@ public class Handler : IHandler, IDisposable
 		_logger.LogWarning("Error saving message: {0}", e.Message);
 	}
 
-	private async Task Save(IList<Data> data)
+	private Task Save(IList<Data> data)
 	{
-		// _stopwatch.Start();
-		await _repository.InsertRangeAsync(data);
-		// Interlocked.Add(ref _counter, BufferSize);
-		// _logger.LogCritical(", {1}", _stopwatch.ElapsedMilliseconds / 1000.0);
+		return _repository.InsertRangeAsync(data);
 	}
 
-	public void HandleMessage(UdpReceiveResult r)
+	public void HandleMessage(ReceivedData r)
 	{
-		_parseQueue.EnqueueTask(r);
-		_tmp.Push(r.RemoteEndPoint.Address.ToString());
+		var res = writer.TryWrite(r);
+		if (res == false)
+		{
+			_logger.LogCritical("Package loss");
+		}
 	}
 
 	private Data GetData(Message msg, IPEndPoint endPoint, DateTime time)
@@ -117,9 +147,6 @@ public class Handler : IHandler, IDisposable
 
 	public void Dispose()
 	{
-		_timer.Change(Timeout.Infinite, 0);
-		_timer.Dispose();
-		_parseQueue?.Dispose();
 		_dbQueue?.Dispose();
 	}
 }

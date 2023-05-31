@@ -7,30 +7,30 @@ namespace Api.Controllers;
 [Route("[controller]")]
 public class HeadersController : ControllerBase
 {
-    private readonly ILogger<HeadersController> _logger;
-    private readonly IAvailableHeaderRepository _repo;
+	private readonly ILogger<HeadersController> _logger;
+	private readonly IAvailableHeaderRepository _repo;
 
-    public HeadersController(ILogger<HeadersController> logger, IAvailableHeaderRepository repository)
-    {
-        _logger = logger;
-        _repo = repository;
-    }
+	public HeadersController(ILogger<HeadersController> logger, IAvailableHeaderRepository repository)
+	{
+		_logger = logger;
+		_repo = repository;
+	}
 
-    [HttpGet()]
-    public IEnumerable<string> Get()
-    {
-        return _repo.FindAll();
-    }
+	[HttpGet()]
+	public string[] Get()
+	{
+		return _repo.FindAll();
+	}
 
-    [HttpPost()]
-    public async Task Post(string[] headers)
-    {
-        await _repo.InsertAsync(headers);
-    }
+	[HttpPost()]
+	public Task Post(string[] headers)
+	{
+		return _repo.InsertAsync(headers);
+	}
 
-    [HttpDelete()]
-    public void Delete(string[] headers)
-    {
-        _repo.Delete(headers);
-    }
+	[HttpDelete()]
+	public void Delete(string[] headers)
+	{
+		_repo.Delete(headers);
+	}
 }

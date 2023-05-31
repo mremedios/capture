@@ -4,5 +4,5 @@ namespace Database.Database;
 
 public interface IContextFactory
 {
-    CallsContext CreateContext();
+	CallsContext CreateContext();
 }

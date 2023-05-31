@@ -5,50 +5,52 @@ namespace Api.Graph;
 
 public class GraphBuilder
 {
-    private List<string> _endpoints = new();
-    private Dictionary<string, int> _endpointIndex = new();
-    private IEnumerable<ShortData> _messages;
+	private static char[] Delimeters = new[] { '\r', '\n' };
+	private List<string> _endpoints = new();
+	private Dictionary<string, int> _endpointIndex = new();
+	private IEnumerable<ShortData> _messages;
 
-    public GraphBuilder(ShortData[] messages)
-    {
-        _messages = messages.OrderBy(x => x.Details.TimeUnix).ThenBy(x => x.Details.TimeOffset);
-    }
 
-    public Sequence Build()
-    {
-        var seq = new Sequence();
+	public GraphBuilder(ShortData[] messages)
+	{
+		_messages = messages.OrderBy(x => x.Details.TimeUnix).ThenBy(x => x.Details.TimeOffset);
+	}
 
-        foreach (var (text, details) in _messages)
-        {
-            var label = text.Split(new[] { '\r', '\n' }, 2).FirstOrDefault("");
+	public Sequence Build()
+	{
+		var seq = new Sequence();
 
-            var time = DateTimeOffset.FromUnixTimeSeconds(details.TimeUnix);
-            var at = $"{time.ToString("h:mm:ss")}.{details.TimeOffset}";
+		foreach (var (text, details) in _messages)
+		{
+			var label = text.Split(Delimeters, 2).FirstOrDefault("");
 
-            var item = new SequenceItem(
-                GetIndex(details.Source),
-                GetIndex(details.Destination),
-                label,
-                at,
-                text
-            );
+			var time = DateTimeOffset.FromUnixTimeSeconds(details.TimeUnix);
+			var at = $"{time:h:mm:ss}.{details.TimeOffset}";
 
-            seq.Messages.Add(item);
-        }
+			var item = new SequenceItem(
+				GetIndex(details.Source),
+				GetIndex(details.Destination),
+				label,
+				at,
+				text
+			);
 
-        seq.Endpoints = _endpoints;
+			seq.Messages.Add(item);
+		}
 
-        return seq;
-    }
+		seq.Endpoints = _endpoints;
 
-    private int GetIndex(string key)
-    {
-        if (!_endpointIndex.ContainsKey(key))
-        {
-            _endpoints.Add(key);
-            _endpointIndex[key] = _endpoints.Count - 1;
-        }
+		return seq;
+	}
 
-        return _endpointIndex[key];
-    }
+	private int GetIndex(string key)
+	{
+		if (!_endpointIndex.ContainsKey(key))
+		{
+			_endpoints.Add(key);
+			_endpointIndex[key] = _endpoints.Count - 1;
+		}
+
+		return _endpointIndex[key];
+	}
 }

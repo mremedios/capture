@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+
 namespace Database.Database.Calls;
 
 public class PartmanRepository : IPartmanRepository
@@ -13,6 +15,6 @@ public class PartmanRepository : IPartmanRepository
     {
         var daysStr = $"{days} days";
         using var ctx = _contextFactory.CreateContext();
-        await ctx.StoredProcedure("partman.set_retention", daysStr);
+        await ctx.StoredProcedure("set_retention", daysStr);
     }
 }

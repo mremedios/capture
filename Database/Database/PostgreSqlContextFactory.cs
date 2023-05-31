@@ -9,29 +9,29 @@ namespace Database.Database;
 
 public class PostgreSqlContextFactory : IContextFactory
 {
-    private DataBaseConnectionConfig _config;
-    private NpgsqlDataSource _dataSource;
+	private DataBaseConnectionConfig _config;
+	private NpgsqlDataSource _dataSource;
 
-    public PostgreSqlContextFactory(IConfiguration config)
-    {
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-        
-        _config = config.GetSection("DataBase").Get<DataBaseConnectionConfig>();
-        var  connectionString = $"Host={_config.Address};Database={_config.Database};Username={_config.Username};Password={_config.Password};Maximum Pool Size={_config.MaxConnections};Search Path={_config.Schema}";
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-        dataSourceBuilder.MapComposite<CallHeader>("header_type");
-        _dataSource = dataSourceBuilder.Build();
-    }
+	public PostgreSqlContextFactory(IConfiguration config)
+	{
+		AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-    public CallsContext CreateContext()
-    {
-        var options = new DbContextOptionsBuilder<CallsContext>();
-        
-        options.UseNpgsql(_dataSource)
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-            .LogTo(Console.WriteLine, LogLevel.Error);
+		_config = config.GetSection("DataBase").Get<DataBaseConnectionConfig>();
+		var connectionString = $"Host={_config.Address};Database={_config.Database};Username={_config.Username};Password={_config.Password};Maximum Pool Size={_config.MaxConnections};Search Path={_config.Schema}";
+		var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+		dataSourceBuilder.MapComposite<CallHeader>("header_type");
+		_dataSource = dataSourceBuilder.Build();
+	}
 
-        return new CallsContext(_config.Schema, options.Options);
-    }
+	public CallsContext CreateContext()
+	{
+		var options = new DbContextOptionsBuilder<CallsContext>();
+
+		options.UseNpgsql(_dataSource)
+			.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+			.LogTo(Console.WriteLine, LogLevel.Error);
+
+		return new CallsContext(options.Options);
+	}
 }
 

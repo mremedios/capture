@@ -1,5 +1,6 @@
 using Database.Database;
 using Database.Database.Calls;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,38 +9,25 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-/*builder.Services.AddCors(options =>
-{
-   // options.
-    options.AddDefaultPolicy(policy =>
-    {
-        policy
-            .WithOrigins("*")
-            .WithMethods("GET,PUT,POST,DELETE,OPTIONS")
-            .WithHeaders("*")
-            .WithExposedHeaders("*");
-    });
-});*/
-
 
 builder.Configuration
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false);
+	.SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
+	.AddJsonFile("appsettings.json", optional: false);
 
 builder.Services
-    .AddSingleton<IAvailableHeaderRepository, AvailableHeaderRepository>()
-    .AddSingleton<IMethodsRepository, MethodsRepository>()
-    .AddSingleton<IReadonlyRepository, ReadonlyRepository>()
-    .AddSingleton<IContextFactory, PostgreSqlContextFactory>()
-    .AddSingleton<IPartmanRepository, PartmanRepository>();
+	.AddSingleton<IAvailableHeaderRepository, AvailableHeaderRepository>()
+	.AddSingleton<IMethodsRepository, MethodsRepository>()
+	.AddSingleton<IReadonlyRepository, ReadonlyRepository>()
+	.AddSingleton<IContextFactory, PostgreSqlContextFactory>()
+	.AddSingleton<IPartmanRepository, PartmanRepository>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+	app.UseSwagger();
+	app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

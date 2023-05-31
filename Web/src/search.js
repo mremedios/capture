@@ -18,7 +18,8 @@ async function sequenceDiagram(header, value, date, url) {
         return json = response.json()
     })
         .then(obj => {
-                drawDiagram(obj, document.getElementById('paper'))
+                // obj.forEach(x => drawDiagram(x, document.getElementById('paper')))    
+                createGraphs(obj)
             }
         )
         .catch(ERR => {
@@ -44,4 +45,13 @@ for (let i = 0; i < array.length; i++) {
     option.value = array[i];
     option.text = array[i];
     selectList.appendChild(option);
+}
+
+function createGraphs(obj) {
+    for (let i = 0; i < obj.length; i++) {
+        let el = document.createElement("div")
+        el.class = "paper"
+        drawDiagram(obj[i], el)
+        document.body.appendChild(el)
+    }
 }

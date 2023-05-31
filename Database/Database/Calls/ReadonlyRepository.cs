@@ -18,7 +18,8 @@ public class ReadonlyRepository : IReadonlyRepository
         var shortMsg = messages.ToList().Select(m =>
             new ShortData(
                 m.Text,
-                JsonSerializer.Deserialize<Details>(m.Details)
+                JsonSerializer.Deserialize<Details>(m.Details),
+                m.LocalCallId
             )
         );
 

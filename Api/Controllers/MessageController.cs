@@ -27,7 +27,7 @@ public class MessageController : ControllerBase
 
 
     [HttpGet(), Route("graph")]
-    public Sequence GraphByDate(string header, string value, string? date)
+    public IEnumerable<Sequence> GraphByDate(string header, string value, string? date)
     {
         ShortData[] messages;
 

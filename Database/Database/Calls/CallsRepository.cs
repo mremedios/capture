@@ -120,7 +120,7 @@ public class CallsRepository : ICallsRepository, IDisposable
             }
         ).Distinct().ToArray();
 
-        await ctx.StoredProcedure($"{_schema}.insert_headers", headers);
+        await ctx.StoredProcedure($"insert_headers", headers);
     }
 
     public void Dispose()

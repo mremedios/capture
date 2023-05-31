@@ -17,7 +17,7 @@ public class PostgreSqlContextFactory : IContextFactory
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         
         _config = config.GetSection("DataBase").Get<DataBaseConnectionConfig>();
-        var  connectionString = $"Host={_config.Address};Database={_config.Database};Username={_config.Username};Password={_config.Password};Maximum Pool Size={_config.MaxConnections}";
+        var  connectionString = $"Host={_config.Address};Database={_config.Database};Username={_config.Username};Password={_config.Password};Maximum Pool Size={_config.MaxConnections};Search Path=partman";
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
         dataSourceBuilder.MapComposite<CallHeader>("header_type");
         _dataSource = dataSourceBuilder.Build();

@@ -5,20 +5,30 @@ namespace Api.Graph;
 
 public class GraphBuilder
 {
-    private List<string> _endpoints = new();
-    private Dictionary<string, int> _endpointIndex = new();
-    private IEnumerable<ShortData> _messages;
+    private readonly List<string> _endpoints = new();
+    private readonly Dictionary<string, int> _endpointIndex = new();
+    private readonly IList<IEnumerable<ShortData>> _calls = new List<IEnumerable<ShortData>>();
 
     public GraphBuilder(ShortData[] messages)
     {
-        _messages = messages.OrderBy(x => x.Details.TimeUnix).ThenBy(x => x.Details.TimeOffset);
+        var calls = messages.ToList().GroupBy(m => m.CallId);
+        foreach (var grouping in calls)
+        {
+            var x = grouping.OrderBy(x => x.Details.TimeUnix).ThenBy(x => x.Details.TimeOffset);
+            _calls.Add(x);
+        }
     }
 
-    public Sequence Build()
+    public IEnumerable<Sequence> Build()
+    {
+        return _calls.Select(BuildSequence);
+    }
+
+    private Sequence BuildSequence(IEnumerable<ShortData> list)
     {
         var seq = new Sequence();
 
-        foreach (var (text, details) in _messages)
+        foreach (var (text, details, _) in list)
         {
             var label = text.Split(new[] { '\r', '\n' }, 2).FirstOrDefault("");
 

@@ -3,5 +3,6 @@ namespace Database.Models;
 public record ShortData
 (
     string SipMessage,
-    Details Details
+    Details Details,
+    int CallId
 );

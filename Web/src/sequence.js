@@ -64,7 +64,7 @@ function drawDiagram(obj, element) {
                 case 'sd.Message': {
                     if (model.opened == null) {
                         let box = linkView.getBBox()
-                        create(model, box.x, box.y + 30, obj['messages'][model.mid])
+                        createDetailsWindow(model, box.x, box.y + 30, obj['messages'][model.mid], element)
                     }
                 }
             }
@@ -91,8 +91,6 @@ function drawDiagram(obj, element) {
     paper.unfreeze();
 }
 
-let pos = document.getElementById('paper').getBoundingClientRect()
-
 function htmlToElement(html) {
     var template = document.createElement('template');
     html = html.trim(); // Never return a text node of whitespace as the result
@@ -100,7 +98,8 @@ function htmlToElement(html) {
     return template.content.firstChild;
 }
 
-function create(model, x, y, jsonEl) {
+function createDetailsWindow(model, x, y, jsonEl, div) {
+    let pos = div.getBoundingClientRect()
     model.opened = true
     let el = htmlToElement(
         `<div class="card" style="position: absolute" ">
